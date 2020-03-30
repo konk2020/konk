@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <!--    <meta http-equiv="refresh" content="0; URL='http://cnn.com'" /> -->
+        
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <style type-"text/css">
+        img {
+            width: 300px;
+        }
+        .btn-submit {
+            width: 150px;
+        }
+            
+        .submit {
+              background-color: #4CAF50;
+              border: none;
+              color: white;
+              padding: 15px 32px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              margin: 4px 2px;
+              cursor: pointer;
+            }    
+            
+            
+        </style>
+    </head>
+  <body>
+      <img src="images/konk_logo.jpg">
+     <h2>Konk The Game</h2>
+     <br>
+    		
+			<br><br>
+		<form method="post" action="players.php">
+    		<b>Host Name:</b><br>
+    		<input type="text" name="host_name">
+    		<br>
+    		<b>Guest Name:</b><br>
+    		<input type="text" name="guest_name">
+            <br>
+            <p><input type="checkbox" name="reset_score" value="yes"> Select to reset score</p>
+    		<br>
+    		<b><input type="submit" name="select" class='submit' value="STEP 1: Record Names Above" class="btn-submit"></b>
+    		<br>
+            
+		</form>
+					
+     <br><br> 
+      
+        <table>
+	  <tr>
+      <td>   
+	   <form method="post" action="host_reshuffle.php">
+		<b><input type="submit" name="select" class='submit' value="STEP 2: 52 Cards Re-shuffle" class="btn-submit"></b>
+       </form>
+      </td> 
+          <td> 
+         <form method="post" action="deal.php">
+		 <b><input type="submit" name="select" value="STEP 3: Deal" class="submit"></b>
+		</td> 
+			</form> 
+          </tr>
+        </table>
+      
+      <br><br> 
+     
+	  <table>
+	  <tr>
+      <td>     
+	  <form method='post' action='guest_select.php'> 	  
+		 <input type='hidden' name='player' value='host'> 
+		 <input type='submit' name="submitbtn" class='submit' value='Host Player'></input>
+     </form>
+     </td> 
+    
+      <td>  
+	  <form method='post' action='guest_select.php'> 	  
+		 <input type='hidden' name='player' value='guest'> 
+		 <input type='submit' name="submitbtn" class='submit' value='GUEST Player'></input>
+     </form>
+     </td>  
+    </tr>
+    </table>
+	 
+	 
+	 
+<!--	<form method="post" action="host_select.php">
+		<br><br>
+		<b><input type="submit" name="select" value="Draw Card" class="btn-submit"></b>
+-->		
+		
+		<br>
+			</form>
+			<br><br>
+
+	
+          	
+	
+		<br>
+		  </body>	
+
+
+
+
+
+
+  		<p>&copy; Konk The Game | By R. Negron</p>
+
+</html>

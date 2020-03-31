@@ -19,12 +19,17 @@ input[type=text], select, textarea {
 
 input[type=submit] {
   background-color: #4CAF50;
-  color: white;
+  color: black;
   padding: 12px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 900;
+  font-size: 25px;
 }
+
+
+
 
 input[type=submit]:hover {
   background-color: #45a049;
@@ -47,12 +52,13 @@ tr:nth-child(even) {
     background-color: white;
 }   
     
-    
+
 .container {
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
 }
+
 </style>
 </head>
 <body>

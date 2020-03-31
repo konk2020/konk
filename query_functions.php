@@ -80,7 +80,7 @@ function print_score_table() {
     } 
 
     /* show my score */
-    $sql = "SELECT player_name, score FROM players"; 
+    $sql = "SELECT players.player_name, player_lvl, score FROM players INNER JOIN player_level ON players.player_name = player_level.player_name"; 
     echo "<table>";
     echo "<tr>";
     echo "<th>Player</th>";
@@ -91,7 +91,7 @@ function print_score_table() {
             while($row = $result->fetch_array()){
                 echo "<tr>";
 
-                      echo "<td style='font-size:2.25em;'>" . $row['player_name'] . "</td>";
+                      echo "<td style='font-size:2.25em;'>" . "L". $row['player_lvl'] . " " . $row['player_name'] . "</td>";
                       echo "<td style='font-size:2.25em;'>" . $row['score'] . "</td>";
 
 
@@ -732,6 +732,8 @@ function check_if_player_won(){
             If ($player1_score > 100 or $player2_score> 100){
                 // go inser the score to the konk_log table  
                 $insert_par = insert_score_into_log($player1_name, $player2_name, $player1_score, $player2_score);
+                // -- set the level of the players that that they have been recorded in the konk_log
+                set_player_level();
             }
             
             
@@ -752,8 +754,41 @@ function insert_score_into_log($player1_name, $player2_name, $player1_score, $pl
         die("Connection failed: " . $conn->connect_error);
     }     
             
+    // -- lets make sure that the players are in a match by checking the rule. Its only a match if the players level differ by 2 levels
+    // -- For Ex: L3 can only play a L1, L9 and only play a L7. 
+
+    $sql = "SELECT player_name, player_lvl from player_level where player='$player1_name'";   
+    if($result = $conn->query($sql)){
+    
+        if($result->num_rows > 0){ 
+			while($row = $result->fetch_array()){
+							$player1_level = $row['player_lvl'];  
+			}	
+        }   
+    }  
+    $sql = "SELECT player_name, player_lvl from player_level where player='$player2_name'";   
+    if($result = $conn->query($sql)){
+    
+        if($result->num_rows > 0){ 
+			while($row = $result->fetch_array()){
+							$player2_level = $row['player_lvl'];  
+			}	
+        }   
+    }  
+
+    // -- check if it is a valid madtch 
+    $player_level_delta = $player1_level - $player2_level;
+
+    if (abs($player_level_delta)<=2) {
+        $match_play = 1;
+
+    } else {
+        $match_play = 0; 
+    }
+
+
     /* insert into hand table */
-    $sql = "INSERT INTO konk_log (player1_name, player2_name, score1, score2) VALUES ('$player1_name', '$player2_name', '$player1_score', $player2_score)";    
+    $sql = "INSERT INTO konk_log (player1_name, player2_name, score1, score2, match_game) VALUES ('$player1_name', '$player2_name', '$player1_score', $player2_score, $match_play)";    
     $conn->query($sql); 
  
       /* insert into hand table */
@@ -868,16 +903,19 @@ function deal_cards(){
 }
 
 
-function set_player1_level(){
+function set_player_level(){
    $conn = OpenCon();
     
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     } 
-        
+        // -- reset the level for all players then run this function to re-calculate
+       $sql5 = "UPDATE player_level SET player_lvl = '0'";
+       $conn->query($sql5);
+
     
     /*read table konk_log*/
-    $sql = "SELECT player1_name, score1, player2_name, score2 FROM konk_log order by date_played"; 
+    $sql = "SELECT player1_name, score1, player2_name, score2, date_played FROM konk_log WHERE match_game='1' order by date_played"; 
             $player_won_count = 0;
             $player_lost_count = 0;
 
@@ -900,6 +938,10 @@ function set_player1_level(){
 
                         $player1_score = $row['score1'];
                        // $player2_score = $row['score2'];
+
+                       $date_played = $row['date_played'];
+                       $player_to_update = $row['player1_name']; // -- used with date_played
+
                         
                         // find the winner
                         if ($player1_score<=100){ 
@@ -918,6 +960,10 @@ function set_player1_level(){
                         $posW += 1;
                         $arraylost[$posL] = $player_lost_name;
                         $posL += 1;
+
+                    // --update the reconciled flad as being a processed records
+                    //    $sql5 = "UPDATE konk_log SET reconciled = '1' where player1_name='$player_to_update' and date_played='$date_played'";
+                    //    $conn->query($sql5);
 
 
                     }
@@ -968,8 +1014,8 @@ function set_player1_level(){
                            if ($numofwin>=3){
                                 $f += 1;
                                $arraylvlwin[$f]= $arraywin[$i-1]; // -- player to add lvl
-                               $k += 1;
-                               $arraylvlwin[$k]=$numofwin; // follow the loser with the number of winners
+                               $f += 1;
+                               $arraylvlwin[$f]=$numofwin; // follow the loser with the number of winners
                                // need to save the level to discount in the array
                            }
                            $numofwin = 1;
@@ -981,6 +1027,7 @@ function set_player1_level(){
 
                         $i++;
                      }
+                     // after the while loop
                      // -- check the last record for losers
                      if ($numoflos>=3){
                         $k += 1;
@@ -991,12 +1038,169 @@ function set_player1_level(){
                     // -- check the last record of winners
                     if ($numofwin>=3){
                         $f += 1;
-                        $arraylvlwin[$k]= $arraywin[$i-1];
-                        $k += 1;
-                        $arraylvlwin[$k]=$numofwin; // follow the loser with the number of winners
+                        $arraylvlwin[$f]= $arraywin[$i-1];
+                        $f += 1;
+                        $arraylvlwin[$f]=$numofwin; // follow the loser with the number of winners
                     }
+                            
+                            //-- lets update the ranking for the winners
+                            $i=1;
+                            $arraywinLength = count($arraylvlwin);
+                             // get the players name 
 
+                            // add level of player has won more than 3 times
+                            while ($i <= $arraywinLength) {
 
+                                $remainder = $i % 2; // -- index is even, then contains the number
+                             if ($remainder==0){       
+                                switch ($arraylvlwin[$i]){
+                                    case 3:
+                                        $level_to_add_to_player = 1;
+                                        break;
+                                     case 4:
+                                        $level_to_add_to_player = 2;
+                                        break;
+                                      case 5:
+                                        $level_to_add_to_player = 3;
+                                        break;
+                                      case 6:
+                                        $level_to_add_to_player = 4;
+                                        break;
+                                      case 7:
+                                        $level_to_add_to_player = 5;
+                                        break;
+                                      case 8:
+                                        $level_to_add_to_player = 6;
+                                        break;
+                                      case 9:
+                                        $level_to_add_to_player = 7;
+                                        break;
+                                      case 10:
+                                        $level_to_add_to_player = 8;
+                                        break;
+                                      case 11:
+                                        $level_to_add_to_player = 9;
+                                        break;
+                                      case 12:
+                                        $level_to_add_to_player = 10;
+                                        break;
+                                      default:
+                                        $level_to_add_to_player = 10;
+                                } // -- end of switch
+                                
+                            } else {
+                                        // - array index is off means its a name of a player
+                                         $winning_player = $arraylvlwin[$i];
+                                         $level_to_add_to_player = 0;   
+                                       }
+                                    //--if
+                                       
+                                        
+                           
+                                if ($level_to_add_to_player > 0){
+                                    // console_log('$level_to_add_to_player'.$level_to_add_to_player);
+                                    //--- code to get the level from player so we can then add levels earned
+                                    $sql1 = "SELECT player_lvl from player_level where player_name='$winning_player'";
+                                    $result1 = $conn->query($sql1);
+                                        if($result1->num_rows > 0){
+                                        $player_saved_score = 0;
+
+                                            while($row = $result1->fetch_array()){
+                                                $winning_player_saved_level = $row['player_lvl'];     
+
+                                            }
+                                        }
+
+                                    //-------------------
+                                    $new_winning_player_level = $winning_player_saved_level + $level_to_add_to_player;
+                                    if ($new_winning_player_level > 10) {$new_winning_player_level=10;}
+                                    $sql = "UPDATE player_level SET player_lvl='$new_winning_player_level' where player_name='$winning_player'";
+
+                                    $conn->query($sql);
+                                }                 
+                               
+                                $i++; // -- array increment
+                           }
+                                
+                                //-- lets update the ranking for the winners
+                                $i=1;
+                                $arraywinLength = count($arraylvllos);
+                                // get the players name 
+
+                                // substracts level of player that has lost 3 or more times
+                                while ($i <= $arraywinLength) {
+
+                                    $remainder = $i % 2; // -- index is even, then contains the number
+                                if ($remainder==0){       
+                                    switch ($arraylvllos[$i]){
+                                        case 3:
+                                            $level_to_sub_to_player = 1;
+                                            break;
+                                        case 4:
+                                            $level_to_sub_to_player = 2;
+                                            break;
+                                        case 5:
+                                            $level_to_sub_to_player = 3;
+                                            break;
+                                        case 6:
+                                            $level_to_sub_to_player = 4;
+                                            break;
+                                        case 7:
+                                            $level_to_sub_to_player = 5;
+                                            break;
+                                        case 8:
+                                            $level_to_sub_to_player = 6;
+                                            break;
+                                        case 9:
+                                            $level_to_sub_to_player = 7;
+                                            break;
+                                        case 10:
+                                            $level_to_sub_to_player = 8;
+                                            break;
+                                        case 11:
+                                            $level_to_sub_to_player = 9;
+                                            break;
+                                        case 12:
+                                            $level_to_sub_to_player = 10;
+                                            break;
+                                        default:
+                                            $level_to_sub_to_player = 10;
+                                    } // -- end of switch
+                                    
+                                } else {
+                                            // - array index is off means its a name of a player
+                                            $lost_player = $arraylvllos[$i];
+                                            $level_to_sub_to_player = 0;   
+                                        }
+                                        //--if
+                                        
+                                            
+                            
+                                    if ($level_to_sub_to_player > 0){
+                                        // console_log('$level_to_add_to_player'.$level_to_add_to_player);
+                                        //--- code to get the level from player so we can then add levels earned
+                                        $sql1 = "SELECT player_lvl from player_level where player_name='$lost_player'";
+                                        $result1 = $conn->query($sql1);
+                                            if($result1->num_rows > 0){
+                                            $player_saved_score = 0;
+
+                                                while($row = $result1->fetch_array()){
+                                                    $lost_player_saved_level = $row['player_lvl'];     
+
+                                                }
+                                            }
+
+                                        //-------------------
+                                        $new_lost_player_level = $lost_player_saved_level - $level_to_sub_to_player;
+                                        if ($new_lost_player_level < 0) {$new_lost_player_level=0;}
+                                        $sql = "UPDATE player_level SET player_lvl='$new_lost_player_level' where player_name='$lost_player'";
+
+                                        $conn->query($sql);
+                                    }                 
+                                
+                                    $i++; // -- array increment
+                            }
+                                                            
 
                     // Free result set
                     $result->free();

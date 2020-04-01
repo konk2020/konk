@@ -71,6 +71,90 @@ function did_game_start() {
     
           
 }        
+//-- used for baby pic
+function player_lowest_points() {
+    $conn = OpenCon();
+    
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    } 
+    
+    $sql = "SELECT player_name, score from players";
+    $one_time =0;
+    if($result = $conn->query($sql)){
+        if($result->num_rows > 0){
+            while($row = $result->fetch_array()){
+
+                    if ($one_time==0){
+                        $player_row1_name = $row['player_name'];
+                        $player_row1_score = $row['score'];
+                        $one_time +=1;
+                    } else {
+                        $player_row2_name = $row['player_name'];
+                        $player_row2_score = $row['score'];
+                    }                 
+   
+            } // - while
+
+            if ($player_row1_score < $player_row2_score) {
+                CloseCon($conn); 
+                return $player_row1_name;
+            }
+
+            if ($player_row2_score < $player_row2_score) {
+                CloseCon($conn); 
+                return $player_row2_name;
+            } else {
+
+                CloseCon($conn); 
+                return 'equalscore';
+
+            }
+
+        }
+    }
+    
+          
+} 
+
+function checK_if_valid_match() {
+    $conn = OpenCon();
+    
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    } 
+        $one_time=0;
+        $sql = "SELECT players.player_name, player_level.player_lvl from players INNER join player_level on players.player_name=player_level.player_name";   
+        if($result = $conn->query($sql)){
+        
+            if($result->num_rows > 0){ 
+                while($row = $result->fetch_array()){
+
+                    if ($one_time==0){
+                        $player_row1_lvl = $row['player_lvl'];
+                        $one_time +=1;
+                    } else {
+                        $player_row2_lvl = $row['player_lvl'];
+                    }                  
+                }   
+            }   
+        }  
+
+        // -- check if it is a valid madtch 
+        $player_level_delta = $player_row1_lvl - $player_row2_lvl;
+
+        if (abs($player_level_delta)<=2) {
+            $match_play = 1;
+
+        } else {
+            $match_play = 0; 
+        }
+        CloseCon($conn); 
+        return $match_play;
+}           
+        
+
+
 
 function print_score_table() {
  $conn = OpenCon();
@@ -83,16 +167,33 @@ function print_score_table() {
     $sql = "SELECT players.player_name, player_lvl, score FROM players INNER JOIN player_level ON players.player_name = player_level.player_name"; 
     echo "<table>";
     echo "<tr>";
+    echo "<th>Level</th>";
     echo "<th>Player</th>";
     echo "<th>Score</th>";
     echo "</tr>";
+
+    $player_with_low_score  = player_lowest_points(); // func returns players name
+    console_log("value of the function". $player_with_low_score);
+
     if($result = $conn->query($sql)){
         if($result->num_rows > 0){
             while($row = $result->fetch_array()){
                 echo "<tr>";
+                 
+                     if ($player_with_low_score == $row['player_name']) {
+                        // -- player with baby
+                        echo "<td style='font-size:2.25em;'>" . "L". $row['player_lvl'] . "</td>";
+                        echo "<td style='font-size:2.25em;'> <img src='images/Baby.png' style='vertical-align:middle; border-radius:1000px;'/>" . $row['player_name'] . "</td>";
+                        echo "<td style='font-size:2.25em;'>" . $row['score'] . "</td>";
 
-                      echo "<td style='font-size:2.25em;'>" . "L". $row['player_lvl'] . " " . $row['player_name'] . "</td>";
-                      echo "<td style='font-size:2.25em;'>" . $row['score'] . "</td>";
+                     } 
+                     
+                     else {
+                        echo "<td style='font-size:2.25em;'>" . "L". $row['player_lvl'] . "</td>";
+                        echo "<td style='font-size:2.25em;'>" . $row['player_name'] . "</td>";
+                        echo "<td style='font-size:2.25em;'>" . $row['score'] . "</td>";
+                     }
+                   
 
 
                 echo "</tr>";
@@ -147,7 +248,7 @@ function print_player_level_table() {
             
             while($row = $result->fetch_array()){
               
-                    console_log('row level:'.$row['player_lvl']);
+                 //   console_log('row level:'.$row['player_lvl']);
                 
                     if ($row['player_lvl']=='0') { $players_string0 .= $row['player_name']. "... ";}
                     if ($row['player_lvl']=='1') { $players_string1 .= $row['player_name']. "... ";}
@@ -198,16 +299,44 @@ function print_konk_log_table() {
     echo "<th>Player2</th>";
     echo "<th>Score2</th>";
     echo "</tr>";
+    
     if($result = $conn->query($sql)){
         if($result->num_rows > 0){
             while($row = $result->fetch_array()){
                 echo "<tr>";
                       echo "<td>" . date('F d, Y', strtotime($row['date_played'])) . "</td>";
-                      echo "<td>" . $row['player1_name'] . "</td>";
-                      echo "<td>" . $row['score1'] . "</td>";
-                      echo "<td>" . $row['player2_name'] . "</td>";
-                      echo "<td>" . $row['score2'] . "</td>";
+                      
+                      if ($row['score1']<=100){
+                            if ($row['score1']==0){
+                                echo "<td style='background-color:#45a049;'><b>" . $row['player1_name'] . "</b></td>";
+                                echo "<td style='background-color:#45a049;'><b>" . $row['score1'] . "</b></td>";  
+                                echo "<td> <img src='images/Chiva.png' style='vertical-align:middle;'/>" . $row['player2_name'] . "</td>";
+                                echo "<td>" . $row['score2'] . "</td>";
+                                
+                            } else {
+                                echo "<td style='background-color:#45a049;'><b>" . $row['player1_name'] . "</b></td>";
+                                echo "<td style='background-color:#45a049;'><b>" . $row['score1'] . "</b></td>";  
+                                echo "<td>" . $row['player2_name'] . "</td>";
+                                echo "<td>" . $row['score2'] . "</td>";
+                            }
+    
+                      } 
 
+                      if ($row['score2']<=100){
+                        if ($row['score2']==0){
+                            echo "<td> <img src='images/Chiva.png' style='vertical-align:middle;'/>" . $row['player1_name'] . "</td>";
+                            echo "<td>" . $row['score1'] . "</b></td>";  
+                            echo "<td style='background-color:#45a049;'><b>" . $row['player2_name'] .  "</b></td>";
+                            echo "<td style='background-color:#45a049;'><b>" . $row['score2'] .  "</b></td>";
+                            
+                        } else {
+                            
+                            echo "<td>" . $row['player1_name'] . "</td>";
+                            echo "<td>" . $row['score1'] . "</td>";
+                            echo "<td style='background-color:#45a049;'><b>" . $row['player2_name'] . "</b></td>";
+                            echo "<td style='background-color:#45a049;'><b>" . $row['score2'] . "</b></td>"; 
+                        }
+                      }
 
                 echo "</tr>";
             }

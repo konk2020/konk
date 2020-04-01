@@ -1,14 +1,11 @@
 <?php   
-$x=1;
 
-for ($s1=1; $s1 <=20; $s1++) {
 
-    $x = $x *2;
-    echo ("hello world");
+//include 'konkdb_connection.php';
+include 'query_functions.php';
 
-}               
+$player_with_low_score  = player_lowest_points();
 
-echo ($x);
-
+echo "result----> ". $player_with_low_score;
 
 ?>

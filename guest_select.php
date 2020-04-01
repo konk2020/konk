@@ -230,6 +230,17 @@ echo "<td>";
     }
 
     echo "</td>";
+
+    echo "<td>";  
+    if (checK_if_valid_match()==1) {
+            echo "<img src='images/Matchbelt.png' width='250' height='125'>";
+    }        
+    else {
+        echo "<h3>Not a match play, will not count for player ranking. You must play a player nor more than 2 levels down from you.";
+    }       
+
+    echo "</td>";
+
     echo "</tr>"; 
     echo "</table>";      
   

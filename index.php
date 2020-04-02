@@ -44,10 +44,18 @@ input[type=submit]:hover {
     width: 100%;
 }
 
-td, th {
+td {
     border: 5px solid #dddddd;
     text-align: center;
     padding: 8px;
+
+}
+
+th {
+    border: 5px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+    background-color: gray;
 
 }
 

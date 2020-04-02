@@ -4,8 +4,13 @@
 //include 'konkdb_connection.php';
 include 'query_functions.php';
 
-$player_with_low_score  = player_lowest_points();
+//$player_with_low_score  = player_lowest_points();
 
-echo "result----> ". $player_with_low_score;
+//echo "result----> ". $player_with_low_score;
+
+
+print_players_stats();
+echo "players stat done!";
+
 
 ?>

@@ -178,7 +178,7 @@ echo "<td>";
                
            }   else {
                
-                     if ($card_picked !== 'yes'){
+                     if ($card_picked !== 'yes' and $draw_par !== 'yes'){
                       echo "<form method='post' action='guest_select.php'> <input type='hidden' name='player' value='".$player_par."'> <input type='hidden' name='draw' value='yes'> <input type='submit' class='submit' value='Draw1 Card'></input></form>";
                       echo "<br>"; 
                      }

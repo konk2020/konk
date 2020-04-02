@@ -101,7 +101,7 @@ function player_lowest_points() {
                 return $player_row1_name;
             }
 
-            if ($player_row2_score < $player_row2_score) {
+            if ($player_row2_score < $player_row1_score) {
                 CloseCon($conn); 
                 return $player_row2_name;
             } else {
@@ -183,7 +183,7 @@ function print_score_table() {
                      if ($player_with_low_score == $row['player_name']) {
                         // -- player with baby
                         echo "<td style='font-size:2.25em;'>" . "L". $row['player_lvl'] . "</td>";
-                        echo "<td style='font-size:2.25em;'> <img src='images/Baby.png' style='vertical-align:middle; border-radius:1000px;'/>" . $row['player_name'] . "</td>";
+                        echo "<td style='font-size:2.25em;'> <img src='images/Baby.png' width='75' height='75' style='vertical-align:middle; border-radius:1000px;'/>" . $row['player_name'] . "</td>";
                         echo "<td style='font-size:2.25em;'>" . $row['score'] . "</td>";
 
                      } 
@@ -1324,7 +1324,7 @@ function set_player_level(){
                                         if ($new_lost_player_level < 0) {$new_lost_player_level=0;}
                                         $sql = "UPDATE player_level SET player_lvl='$new_lost_player_level' where player_name='$lost_player'";
 
-                                        $conn->query($sql);
+                                      //  will not commit per Tio Willie  $conn->query($sql);  
                                     }                 
                                 
                                     $i++; // -- array increment
@@ -1341,6 +1341,184 @@ function set_player_level(){
   
     
 }
+
+// -- print the number of wins per player and the average gap (diff between the scores)
+function print_players_stats(){
+    $conn = OpenCon();
+     
+     if ($conn->connect_error) {
+         die("Connection failed: " . $conn->connect_error);
+     } 
+         // -- reset the level for all players then run this function to re-calculate
+      //  $sql5 = "UPDATE player_level SET player_lvl = '0'";
+       // $conn->query($sql5);
+ 
+     
+     /*read table konk_log*/
+     $sql = "SELECT player1_name, score1, player2_name, score2, date_played FROM konk_log WHERE match_game='1' order by date_played"; 
+             $player_won_count = 0;
+             $player_lost_count = 0;
+ 
+             $player_won_name = '';
+             $player_lost_name = '';
+     
+             $player1_lost_name = '';
+     
+ 
+             $arraywin = array();
+             $arraylost = array();
+             
+             $posW = 1;
+             $posL = 1;
+ 
+     
+             if($result = $conn->query($sql)){
+                 if($result->num_rows > 0){
+                     while($row = $result->fetch_array()){
+ 
+                         $player1_score = $row['score1'];
+                        // $player2_score = $row['score2'];
+ 
+                        $date_played = $row['date_played'];
+                        $player_to_update = $row['player1_name']; // -- used with date_played
+ 
+                         
+                         // find the winner
+                         if ($player1_score<=100){ 
+                             $player_won_name = $row['player1_name'];
+                             $player_lost_name = $row['player2_name'];
+                         
+                         }
+                         else { 
+                             
+                             $player_won_name = $row['player2_name'];
+                             $player_lost_name = $row['player1_name'];
+                         
+                         }
+                        
+                         $arraywin[$posW] = $player_won_name;
+                         $posW += 1;
+                         $arraylost[$posL] = $player_lost_name;
+                         $posL += 1;
+ 
+        
+ 
+                     }
+ 
+ 
+                     $arraywinLength = count($arraywin);
+                         
+                     $i = 1;
+                     $k = 0;
+                     $f = 0;
+                     $numoflos = 0;
+                     $numofwin = 0;
+                     
+                     $lost_player = $arraylost[1];
+                     $won_player = $arraywin[1];
+ 
+                     $arraylvllos = array();
+                     $arraylvlwin = array();
+                     
+                     echo "<table>";
+                     echo "<th>Players with 3 or more block of consecutive wins</th>";
+                     echo "<th>Wins per block.  Hint! 3+ consecutive wins will move a player 1 level+ on the ranking table above</th>";
+                     
+                     while ($i <= $arraywinLength) // - same for both arrays
+                      {
+                         if ($lost_player==$arraylost[$i]) {
+                              $numoflos += 1;
+ 
+                         } else {
+ 
+                             if ($numoflos>=3){
+                                 $k += 1;
+                                 $arraylvllos[$k]= $arraylost[$i-1];
+                                 $k += 1;
+                                 $arraylvllos[$k]=$numoflos; // follow the loser with the number of losses
+ 
+                                  // -- player to deduct lvl
+                                 // need to save the level to discount in the array
+                             }
+                             $numoflos = 1;
+                             $lost_player = $arraylost[$i]; // change player
+                         }
+                         
+         
+                         // - winners
+                         if ($won_player==$arraywin[$i]) {
+                             $numofwin += 1;
+ 
+                        } else {
+ 
+                            if ($numofwin>=3){
+                                
+                                $h = $i-1;
+                                echo "<tr>";
+                                echo "<td>";
+                                echo $arraywin[$h];
+                                echo "</td>";
+                                echo "<td>";
+                                echo $numofwin;
+                                echo "</td>";
+                                
+                                $f += 1;
+                                $arraylvlwin[$f]= $arraywin[$i-1]; // -- player to add lvl
+                                $f += 1;
+                                $arraylvlwin[$f]=$numofwin; // follow the loser with the number of winners
+                                // need to save the level to discount in the array
+                            }
+                            $numofwin = 1;
+                            $won_player = $arraywin[$i]; // change player
+                        }
+ 
+                        //  $arraywin[$i];
+ 
+                         $i++;
+                      }
+                      echo "</tr>";
+                    //  echo "</table>";
+                   //   echo "<br>";
+
+                    //  echo "<table>";
+                    //  echo "<th align='left'>Number of Wins per Player</th>";
+                      echo "<td>";
+                    
+                      echo "<b>Number of Wins per Player --></b>";              
+                      echo "<td>";
+                      echo print_r(array_count_values($arraywin));
+                      echo "</td>";
+                      echo "</tr>";
+                      echo "</table>";
+                      
+                      // after the while loop
+                      // -- check the last record for losers
+                      if ($numoflos>=3){
+                         $k += 1;
+                         $arraylvllos[$k]= $arraylost[$i-1];
+                         $k += 1;
+                         $arraylvllos[$k]=$numoflos; // follow the loser with the number of losses
+                      }
+                     // -- check the last record of winners
+                     if ($numofwin>=3){
+                         $f += 1;
+                         $arraylvlwin[$f]= $arraywin[$i-1];
+                         $f += 1;
+                         $arraylvlwin[$f]=$numofwin; // follow the loser with the number of winners
+                     }
+                                                                    
+ 
+                     // Free result set
+                     $result->free();
+                 } 
+             } 
+     
+     
+     CloseCon($conn);  
+   
+     
+ }
+
 
 
 

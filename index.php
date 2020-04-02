@@ -114,6 +114,7 @@ tr:nth-child(even) {
 
 <?php include_once 'query_functions.php';
     print_player_level_table();
+    print_players_stats();
     print_konk_log_table();
 ?>
 

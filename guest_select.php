@@ -236,7 +236,7 @@ echo "<td>";
             echo "<img src='images/Matchbelt.png' width='250' height='125'>";
     }        
     else {
-        echo "<h3>Not a match play, will not count for player ranking. You must play a player nor more than 2 levels down from you.";
+        echo "<h3>Not a match play. You have to be within 2 levels of your opponent.";
     }       
 
     echo "</td>";
@@ -461,6 +461,9 @@ If ($player_par=='guest'){
 
 	$_SESSION['player'] = 'guest'; 
 }
+//-- this is used for the index page in case the user goes back to try to see the opponets card
+$_SESSION['player_for_index'] = $player_par;
+
 
 echo "<td>";
 include 'players_hand.php';

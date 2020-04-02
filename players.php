@@ -4,8 +4,8 @@
 
 </head>
   <body>
-	<h2><a href="/">Go Back</a></h2><br>
-	<h4>Players</h4>
+	<h2><a href=".">Go Back</a></h2><br>
+	<h4>Updating Game...</h4>
 	
 
 <?php
@@ -17,7 +17,13 @@
       
       
   
-   echo "Param 1: ". $host_name ." Param 2: " . $guest_name ." Param 3: " . $reset_score_par ." Param 4: " . $shuffle_cards_par;
+   echo "Host Name: ". $host_name;
+   echo "<br>";
+   echo "Guest Name: " . $guest_name;
+   echo "<br>";
+   echo "Reset Score for both players: " . $reset_score_par; 
+   echo "<br>";
+   echo "Suffle Cards: " . $shuffle_cards_par;
    echo "<br>";
    
     include_once 'query_functions.php';
@@ -34,13 +40,15 @@ if($result = $conn->query($sql)){
     
     if($result->num_rows > 0){    
         echo "<br>";
-        echo "Table players already have players but updating names!";
+        echo "Updating based on parameters above, if none, no results will be display below!";
         
         // --- update host name
         if (empty($_POST['host_name'] == false)){
             
             $sql = "UPDATE players set player_name='$host_name' where player='host'";
             $conn->query($sql);
+            echo "<br>";
+            echo "Host name updated to ". $host_name;
             
         }
        
@@ -48,12 +56,18 @@ if($result = $conn->query($sql)){
             // --- update guest name
             $sql = "UPDATE players set player_name='$guest_name' where player='guest'";
             $conn->query($sql);
+
+            echo "<br>";
+            echo "Guest name updated to ". $guest_name;
         }
         
         if ($reset_score_par=='yes'){
           // --- update guest name
             $sql = "UPDATE players set score='0' where 1=1";
             $conn->query($sql);  
+
+            echo "<br>";
+            echo "Score reset to 0 succesfully!";            
             
         }
         
@@ -107,4 +121,6 @@ if($result = $conn->query($sql)){
 ?>    
 
 </body>
+
+<p><center>&copy; Konk The Game | version 1.0</p></center>
 </html>

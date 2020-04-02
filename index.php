@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,12 +66,37 @@ tr:nth-child(even) {
 </head>
 <body>
  <center><img src="images/konk_logo.jpg"></center>
+ <?php
+
+$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$url = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+//echo $url; // Outputs: Full URL
+
+$protocol_var = 'http:';
+$host_var = 'konk.us';
+
+if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false) {
+
+  $secure_url = 'https://konk.us/guest_select.php';
+  $secure_url1 = 'https://konk.us/players.php';
+
+} else {
+    $secure_url = 'guest_select.php';
+    $secure_url1 = 'players.php';
+    
+  }
+
+
+
+ 
+?>
+
  <h2>Konk The Game</h2>
     
 <h3>Only 2 allowed to play at one time</h3>
 
 <div class="container">
-  <form method="post" action="players.php">
+    <form method='post' action='<?=$secure_url1?>'> 	
     <label for="host_name">Player (host) Name</label>
     <input type="text" id="host_name" name="host_name" placeholder="Host Player First Name..">
 
@@ -95,16 +123,55 @@ tr:nth-child(even) {
       <table>
 	  <tr>
       <td>     
-	  <form method='post' action='guest_select.php'> 	  
+	  <?php   echo "Session player (". $_SESSION ['player_for_index'] . ") if not host, btn disabled"; ?>
+     
+     <form method='post' action='<?=$secure_url?>'> 		   
 		 <input type='hidden' name='player' value='host'> 
-		 <input type='submit' name="submitbtn" class='submit' value='Host Player'></input>
+<?php 
+
+if (isset($_SESSION ['player_for_index'])) {
+    if ($_SESSION ['player_for_index']=='host'){
+
+      $btn_host = 'enable';
+    }
+      else {
+
+        $btn_host = 'disabled';
+      }
+  }  else {
+      $btn_host = 'enable';
+    } 
+
+?>
+		 <input type='submit' <?=$btn_host?> name="submitbtn" class='submit' value='Host Player'></input>
+
      </form>
      </td> 
     
       <td>  
-	  <form method='post' action='guest_select.php'> 	  
+      <?php   echo "Session player (". $_SESSION ['player_for_index'] . ") if not guest, btn disabled"; ?>
+      <form method='post' action='<?=$secure_url?>'> 	 
 		 <input type='hidden' name='player' value='guest'> 
-		 <input type='submit' name="submitbtn" class='submit' value='GUEST Player'></input>
+<?php 
+  
+  if (isset($_SESSION ['player_for_index'])) {
+        if ($_SESSION ['player_for_index']=='guest'){
+
+          $btn_guest = 'enable';
+        }
+          else {
+
+            $btn_guest = 'disabled';
+          }
+  } else {
+    $btn_guest = 'enable';
+  }
+
+
+
+?>
+
+		 <input type='submit' <?=$btn_guest?> name="submitbtn" class='submit' value='GUEST Player'></input>
      </form>
      </td>  
      </tr>

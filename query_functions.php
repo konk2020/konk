@@ -1420,9 +1420,7 @@ function print_players_stats(){
                      $arraylvllos = array();
                      $arraylvlwin = array();
                      
-                     echo "<table>";
-                     echo "<th>Players with 3 or more block of consecutive wins</th>";
-                     echo "<th>Wins per block.  Hint! 3+ consecutive wins will move a player 1 level+ on the ranking table above</th>";
+                    
                      
                      while ($i <= $arraywinLength) // - same for both arrays
                       {
@@ -1453,14 +1451,7 @@ function print_players_stats(){
  
                             if ($numofwin>=3){
                                 
-                                $h = $i-1;
-                                echo "<tr>";
-                                echo "<td>";
-                                echo $arraywin[$h];
-                                echo "</td>";
-                                echo "<td>";
-                                echo $numofwin;
-                                echo "</td>";
+                             
                                 
                                 $f += 1;
                                 $arraylvlwin[$f]= $arraywin[$i-1]; // -- player to add lvl
@@ -1472,24 +1463,11 @@ function print_players_stats(){
                             $won_player = $arraywin[$i]; // change player
                         }
  
-                        //  $arraywin[$i];
+                      
  
                          $i++;
                       }
-                      echo "</tr>";
-                    //  echo "</table>";
-                   //   echo "<br>";
-
-                    //  echo "<table>";
-                    //  echo "<th align='left'>Number of Wins per Player</th>";
-                      echo "<td>";
-                    
-                      echo "<b>Number of Wins per Player --></b>";              
-                      echo "<td>";
-                      echo print_r(array_count_values($arraywin));
-                      echo "</td>";
-                      echo "</tr>";
-                      echo "</table>";
+              
                       
                       // after the while loop
                       // -- check the last record for losers
@@ -1506,7 +1484,46 @@ function print_players_stats(){
                          $f += 1;
                          $arraylvlwin[$f]=$numofwin; // follow the loser with the number of winners
                      }
-                                                                    
+                          
+                     $arraywinLength = count($arraylvlwin);
+                     $i=1;
+                     echo "<table>";
+                     echo "<th>Players with 3 or more block of consecutive wins</th>";
+                     echo "<th>Wins per block.  Hint! 3+ consecutive wins will move a player 1 level+ on the ranking table above</th>";
+        
+          
+                     while ($i <= $arraywinLength){
+
+                            if ($i %2 !==0){
+                                echo "<tr>";
+                                echo "<td>";
+                                echo $arraylvlwin[$i];
+                                echo "</td>";
+                            } else { 
+                                
+                                    echo "<td>";
+                                    echo $arraylvlwin[$i];
+                                    echo "</td>";
+                                    echo "</tr>";
+                                    }
+
+                        $i += 1;
+                     }
+
+                     echo "<tr>";
+                     echo "<td>";
+                   
+                     echo "<b>Number of Wins per Player --></b>";              
+                     echo "<td>";
+                     echo print_r(array_count_values($arraywin));
+                     echo "</td>";
+                     echo "</tr>";
+
+                     echo "</table>";
+
+
+
+
  
                      // Free result set
                      $result->free();

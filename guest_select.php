@@ -119,12 +119,12 @@ $player_won = check_if_player_won($player_par);
 echo "<tr>";
 echo "<td>"; 
           
-console_log('$guest_just_played:'.$guest_just_played);
-console_log('$$player_par:'.$player_par);
-console_log('who_delt_last_func_return:'.who_delt_last());
-console_log('$shuffle_deck_par:'.$shuffle_deck_par);  
-console_log('did_a_player_knocked_func_return:'.did_a_player_knocked()); 
-console_log('did_game_start_func_return:'.did_game_start());          
+//console_log('$guest_just_played:'.$guest_just_played);
+//console_log('$$player_par:'.$player_par);
+//console_log('who_delt_last_func_return:'.who_delt_last());
+//console_log('$shuffle_deck_par:'.$shuffle_deck_par);  
+//console_log('did_a_player_knocked_func_return:'.did_a_player_knocked()); 
+//console_log('did_game_start_func_return:'.did_game_start());          
                     
           
 if ($guest_just_played=='1' and did_a_player_knocked()<>'1') {
@@ -151,7 +151,7 @@ if ($guest_just_played=='1' and did_a_player_knocked()<>'1') {
                         if ($discard_one_par=='yes'){
                           
                             echo "<img src='images/Processing.gif'>"; 
-                            console_log('RESETING the GLOBAL VAR flip_card_pick_from_table');   
+                            //console_log('RESETING the GLOBAL VAR flip_card_pick_from_table');   
                             unset($_SESSION['flip_card_pick_from_table']); // -- flip the card back 
                             
                         } else {echo "<img src='images/Your_Turn.gif'>"; }
@@ -161,8 +161,8 @@ if ($guest_just_played=='1' and did_a_player_knocked()<>'1') {
 echo "</td>"; 
 echo "<td>";          
 //echo "Player who won parameter > ".$player_won;       
-          console_log('count_cards_func_return:'.count_cards($player_par)); 
-          console_log('$guest_just_played:'.$guest_just_played); 
+          //console_log('count_cards_func_return:'.count_cards($player_par)); 
+          //console_log('$guest_just_played:'.$guest_just_played); 
     if ((count_cards($player_par) == '3' and $guest_just_played=='0') or did_a_player_knocked()=='1') {
   //     echo "The number of cards read in hand for guest is: " . $cards_in_hand;
      //  echo "<br>";
@@ -251,7 +251,7 @@ echo "<td>";
               /*draw a card */
                 $discard_one_rtn = discard_card($card_to_discard_par, $player_par);
             
-                if (check_for_knock($player_par)=='1'){
+                if (check_for_knock($player_par)=='1' || check_for_knock($player_par)=='A'){
                     
                     $player_knocked = player_is_knocking($player_par); // record the score
                     $_SESSION['knocking'] = 'yes'; 
@@ -267,7 +267,7 @@ echo "<td>";
     
        if ($card_picked == 'yes'){        
               /*draw a card */
-                console_log('$card_pick_from_table_par:'.$card_pick_from_table_par);
+              //  console_log('$card_pick_from_table_par:'.$card_pick_from_table_par);
                 $discard_one_rtn = pick_from_table($card_pick_from_table_par, $player_par);
                 $_SESSION['card_pick_from_table']=$card_pick_from_table_par; // use for the border around the card
                 $_SESSION['flip_card_pick_from_table']=$_SESSION['card_pick_from_table']; 
@@ -393,11 +393,13 @@ if($result = $conn->query($sql)){
             }    
                 
              //     if (isset($_SESSION['knocking']) || did_opponent_knocked($player_par)=='1'){
-			         
+                    console_log("value ".check_for_knock ($player_par));
+                    console_log("value2 ".did_a_player_knocked());
                     if (did_a_player_knocked()=='1'){
-			
-                //	echo "Knocking session variable not set";
-                        $imagepath = "images\Knock.gif";
+                        
+                        if (check_for_knock ('guest')=='A' || check_for_knock ('host')=='A') {
+                            $imagepath = "images\AC2C.gif";
+                            } else { $imagepath = "images\Knock.gif";}
 				     }  	
             
             

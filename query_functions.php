@@ -795,6 +795,19 @@ function check_for_knock($player){
           //  echo "<br>";
           //  echo "&&&&&: ".$card_suit;
             
+            // return 1, normaml knock
+            // return A, AC2C 2 aces and duce
+            // return K, is KONK straight of same suit + 4th card 
+
+            // AC2C knocking for 4 points of less
+            if ($card_number== '112' || $card_number== '121' || $card_number== '211'){
+                    // Free result set
+                    $result->free();
+                    CloseCon($conn);
+                    return 'A'; // AC2C Knocking for 4 points
+            }
+
+
             
             if ((($card_suit=='SSS' || $card_suit=='CCC' || $card_suit=='HHH' || $card_suit=='DDD') and ($card_number=='123' || $card_number=='234' || $card_number=='345' || $card_number=='456' || $card_number=='567' || $card_number=='678' || $card_number=='789' || $card_number=='890' || $card_number=='089' || $card_number=='90J' || $card_number=='09J' || $card_number=='0JQ' || $card_number=='JQK' || $card_number=='JKQ')) OR ($card_number=='111' || $card_number=='222' || $card_number=='333' || $card_number=='444' || $card_number=='555' || $card_number=='666' || $card_number=='777' || $card_number=='888' || $card_number=='999' || $card_number=='000' || $card_number=='JJJ' || $card_number=='QQQ' || $card_number=='KKK')) {
 

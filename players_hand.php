@@ -17,8 +17,6 @@ else {
     $sql = "SELECT * FROM hand INNER JOIN deck on hand.card_delt=deck.card where player = '".$_SESSION['player']."' order by deck.order, deck.suit_order";
 
           echo "<h2> ". get_players_name($_SESSION['player'])." (". $_SESSION['player'].") hand</h2>";    
-    
-        
         
 	echo "<table>";
 	
@@ -59,10 +57,10 @@ else {
                         $player = 'guest';
                     }
                 
-					console_log('GLOBAL VAR flip_card_pick_from_table:'.$_SESSION['flip_card_pick_from_table']);
-                    console_log('$card_delt:'.$card_delt);
-                    console_log('$player OPPONENT HAND:'.$player);
-                    console_log('get_picked_card_func_return:'.get_picked_card($_SESSION['player']));
+				//	console_log('GLOBAL VAR flip_card_pick_from_table:'.$_SESSION['flip_card_pick_from_table']);
+               //     console_log('$card_delt:'.$card_delt);
+                //    console_log('$player OPPONENT HAND:'.$player);
+                //    console_log('get_picked_card_func_return:'.get_picked_card($_SESSION['player']));
                 
 				  //  if (!isset($_SESSION['knocking']) and did_opponent_knocked($player)=='0'){
 				   if (!did_a_player_knocked()=='1') { 
@@ -91,6 +89,8 @@ else {
 				
 				
 			}
+
+	
             echo "</tr>";
 			echo "</table>";
 			// Free result set

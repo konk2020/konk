@@ -785,16 +785,34 @@ function check_for_knock($player){
                 }
                 
                 $x++; 
-               
-              //  echo "card:".$card_drawn;
-               //    echo "<br>";
-                
             }
-            
-          //  echo "-----:".$card_number;
-          //  echo "<br>";
-          //  echo "&&&&&: ".$card_suit;
-            
+        }
+    }
+        
+        
+               // use to check the last card discarded to make sure is not part of a KONK hand
+                $sql = "SELECT card_played FROM played where player ='$player' ORDER BY time_card_played DESC LIMIT 1"; 
+
+                if($result = $conn->query($sql)){
+                    if($result->num_rows > 0){
+                        
+                        while($row = $result->fetch_array()){
+                            
+                            $last_card_drawn = $row['card_played'];
+
+                                $last_card_suit = substr($last_card_drawn,0,1);
+                                $last_card_number = substr($last_card_drawn,-1);
+
+                        }
+                    }
+                }
+                            
+                $four_cards_suit = $card_suit . substr($last_card_drawn,0,1);
+                $four_cards_number = $card_number . substr($last_card_drawn,-1);           
+                
+                console_log($four_cards_suit."  ");
+                console_log($four_cards_number);
+
             // return 1, normaml knock
             // return A, AC2C 2 aces and duce
             // return K, is KONK straight of same suit + 4th card 
@@ -807,15 +825,23 @@ function check_for_knock($player){
                     return 'A'; // AC2C Knocking for 4 points
             }
 
+            // KONK knocking with 4 cards straight 
+            if (($four_cards_suit=='SSSS' || $four_cards_suit=='CCCC' || $four_cards_suit=='HHHH' || $four_cards_suit=='DDDD') and ($four_cards_number=='1234' || $four_cards_number=='2345' || $four_cards_number=='3456' || $four_cards_number=='4567' || $four_cards_number=='5678' || $four_cards_number=='6789' || $four_cards_number=='7890' || $four_cards_number=='0789' || $four_cards_number=='890J' || $four_cards_number=='089J' || $four_cards_number=='90JQ' || $four_cards_number=='09JQ' || $four_cards_number=='0JQK' || $four_cards_number=='0JKQ')) {
+                // Free result set
+                $result->free();
+                CloseCon($conn);
+                return 'K'; // Say goodbye! this is KONK
 
+            }
             
+            // regular know check if none of the above were triggered
             if ((($card_suit=='SSS' || $card_suit=='CCC' || $card_suit=='HHH' || $card_suit=='DDD') and ($card_number=='123' || $card_number=='234' || $card_number=='345' || $card_number=='456' || $card_number=='567' || $card_number=='678' || $card_number=='789' || $card_number=='890' || $card_number=='089' || $card_number=='90J' || $card_number=='09J' || $card_number=='0JQ' || $card_number=='JQK' || $card_number=='JKQ')) OR ($card_number=='111' || $card_number=='222' || $card_number=='333' || $card_number=='444' || $card_number=='555' || $card_number=='666' || $card_number=='777' || $card_number=='888' || $card_number=='999' || $card_number=='000' || $card_number=='JJJ' || $card_number=='QQQ' || $card_number=='KKK')) {
 
                 $player_can_knock = '1';
                 
             } else { $player_can_knock = '0'; }    
                 
-        } 
+       // } 
                 
             // Free result set
             $result->free();
@@ -824,7 +850,7 @@ function check_for_knock($player){
           CloseCon($conn);
           return $player_can_knock;
          // return $card_suit;
-    }
+    //}
 //CloseCon($conn);  
 }
 

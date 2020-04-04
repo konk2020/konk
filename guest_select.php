@@ -19,6 +19,16 @@ if (isset($_POST['player'])) {
     $discard_one_par = $_POST['discard_one'];
     $card_picked = $_POST['pick_from_table']; // yes/no
     $card_pick_from_table_par = $_POST['card_to_pick'];
+    $knock_btn_pressed = $_POST['knock'];
+    $dont_knock_btn_pressed = $_POST['dont-knock'];
+    
+    if ($dont_knock_btn_pressed=='yes'){
+
+        $_SESSION['keep_playing'] = 'yes';
+
+    }
+
+
 
 //	echo "<h2>Your are the ". $player_par. "</h2>";
 
@@ -119,7 +129,7 @@ $player_won = check_if_player_won($player_par);
 echo "<tr>";
 echo "<td>"; 
           
-//console_log('$guest_just_played:'.$guest_just_played);
+console_log('$knock_btn_pressed '.$knock_btn_pressed);
 //console_log('$$player_par:'.$player_par);
 //console_log('who_delt_last_func_return:'.who_delt_last());
 //console_log('$shuffle_deck_par:'.$shuffle_deck_par);  
@@ -178,7 +188,7 @@ echo "<td>";
                
            }   else {
                
-                     if ($card_picked !== 'yes' and $draw_par !== 'yes'){
+                     if ($card_picked !== 'yes' and $draw_par !== 'yes' and $dont_knock_btn_pressed!=='yes'){
                       echo "<form method='post' action='guest_select.php'> <input type='hidden' name='player' value='".$player_par."'> <input type='hidden' name='draw' value='yes'> <input type='submit' class='submit' value='Draw1 Card'></input></form>";
                       echo "<br>"; 
                      }
@@ -186,7 +196,7 @@ echo "<td>";
            } 
            
         } // player knocked
-        else { console_log('else portion.... to show Shuffle Cards button');   
+        else { //console_log('else portion.... to show Shuffle Cards button');   
             if ($shuffle_deck_par <> 'yes'){
                 
                 if ($player_par <> who_delt_last()) {
@@ -247,14 +257,19 @@ echo "<td>";
     
         //echo "==============>   " . $discard_one_par;
         
-        if ($discard_one_par=='yes'){        
+        if ($discard_one_par=='yes' || $knock_btn_pressed=='yes' || $dont_knock_btn_pressed =='yes'){        
               /*draw a card */
-                $discard_one_rtn = discard_card($card_to_discard_par, $player_par);
+
+                if ($dont_knock_btn_pressed !=='yes'){
+                    $discard_one_rtn = discard_card($card_to_discard_par, $player_par);
+                }
             
-                if (check_for_knock($player_par)=='1' || check_for_knock($player_par)=='A'){
+                if ((check_for_knock($player_par)=='1' || check_for_knock($player_par)=='A' || check_for_knock($player_par)=='K') and ($dont_knock_btn_pressed <> 'yes')) {
                     
-                    $player_knocked = player_is_knocking($player_par); // record the score
-                    $_SESSION['knocking'] = 'yes'; 
+                    if ($knock_btn_pressed =='yes') {
+                        $player_knocked = player_is_knocking($player_par, check_for_knock($player_par)); // record the score
+                        $_SESSION['knocking'] = 'yes'; 
+                    }
                     
                 } else { 
                     // -- discarded card but is not a knock, then move to the other player
@@ -294,7 +309,22 @@ $sql = "SELECT * FROM hand INNER JOIN deck on hand.card_delt=deck.card where pla
     echo "<h2>". get_players_name($player_par)." (". $player_par.") hand </h2>";
 	
     echo "<table>";
-        
+    
+    if ((check_for_knock($player_par)=='1' || check_for_knock($player_par)=='A' || check_for_knock($player_par)=='K') and (did_a_player_knocked()=='0') and $guest_just_played<>'1'){
+            echo "<tr>";
+            echo "<td>";
+            echo "<center>";
+            echo "<form method='post' action='guest_select.php'> <input type='hidden' name='player' value='".$player_par."'> <input type='hidden' name='knock' value='yes'> <input type='submit' class='submit' value='You can Knock!!'></input></form>";
+            echo "</center>";
+            echo "<td>";    
+
+            echo "<td>";
+            echo "<center>";
+            echo "<form method='post' action='guest_select.php'> <input type='hidden' name='player' value='".$player_par."'> <input type='hidden' name='dont-knock' value='yes'> <input type='submit' class='submit' value='Keep Playing!!'></input></form>";
+            echo "</center>";
+            echo "</td>"; 
+    }
+
 if($result = $conn->query($sql)){
     if($result->num_rows > 0){
         echo "<tr>";
@@ -393,14 +423,21 @@ if($result = $conn->query($sql)){
             }    
                 
              //     if (isset($_SESSION['knocking']) || did_opponent_knocked($player_par)=='1'){
-                    console_log("value ".check_for_knock ($player_par));
-                    console_log("value2 ".did_a_player_knocked());
+                  //  console_log("value ".check_for_knock ($player_par));
+                   // console_log("value2 ".did_a_player_knocked());
                     if (did_a_player_knocked()=='1'){
-                        
+                        unset($_SESSION['KONK']);
                         if (check_for_knock ('guest')=='A' || check_for_knock ('host')=='A') {
                             $imagepath = "images\AC2C.gif";
-                            } else { $imagepath = "images\Knock.gif";}
-				     }  	
+                            } else { 
+                                        if (check_for_knock ('guest')=='K' || check_for_knock ('host')=='K') {
+                                                $imagepath = "images\KONK.gif";
+                                                $_SESSION['KONK'] = 'yes'; 
+
+                                        } else { $imagepath = "images\Knock.gif"; }
+                                  }  
+                        }  else {unset($_SESSION['KONK']);}  
+
             
             
                //    echo "<td>" . $row['player'] . "</td>";
@@ -451,7 +488,7 @@ print_score_table();
 echo "</td>"; 
 
           
-
+// --
 // --------- show the oponents cards --------
 
 //echo "oooooooo ".$player_par;
@@ -470,6 +507,17 @@ $_SESSION['player_for_index'] = $player_par;
 echo "<td>";
 include 'players_hand.php';
 echo "</td>";
+
+if ($_SESSION['KONK']=='yes'){
+
+    include 'players_4hand.php';
+
+} else {
+
+       echo "</tr>";
+	   echo "</table>";
+}
+
           
 echo "</tr>";
 echo "</table>";          

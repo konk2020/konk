@@ -173,7 +173,7 @@ function print_score_table() {
     echo "</tr>";
 
     $player_with_low_score  = player_lowest_points(); // func returns players name
-    console_log("value of the function". $player_with_low_score);
+    //console_log("value of the function". $player_with_low_score);
 
     if($result = $conn->query($sql)){
         if($result->num_rows > 0){
@@ -672,7 +672,7 @@ function set_just_played_flag($player){
 } 
 
 //----- player is knocking ---- 
-function player_is_knocking($player){
+function player_is_knocking($player,$konk_flag){
   $conn = OpenCon();
     
     $player_orginal_par = $player;
@@ -725,7 +725,14 @@ function player_is_knocking($player){
                  }
             
 				//-------------------
-			    $player_score = $player_score + $player_saved_score;
+                $player_score = $player_score + $player_saved_score;
+                
+                // if K that means that the player did KONK. Add 101 points. This means that the other player will 
+                // pass 100 points and will lose the game. 
+                if ($konk_flag=='K'){
+                    $player_score += 101;
+                }
+
                 $sql = "UPDATE players SET score='$player_score' where player='$player'";
                 
                 $conn->query($sql); 
@@ -803,15 +810,45 @@ function check_for_knock($player){
                                 $last_card_suit = substr($last_card_drawn,0,1);
                                 $last_card_number = substr($last_card_drawn,-1);
 
+                                
+
+
+
                         }
                     }
                 }
                             
                 $four_cards_suit = $card_suit . substr($last_card_drawn,0,1);
-                $four_cards_number = $card_number . substr($last_card_drawn,-1);           
+                $four_cards_number = $card_number . substr($last_card_drawn,-1); 
+                console_log("suit " . $four_cards_suit);
+                console_log("cards " . $four_cards_number);
+
+            $string1 = "1234:1243:1324:1342:1432:1423:2134:2143:2314:2341:2431:2413:3214:3241:3124:3142:3412:3421:4231:4213:4321:4312:4132:4123";                
+            $string2 = "12345:2354:2435:2453:2543:2534:3245:3254:3425:3452:3542:3524:4325:4352:4235:4253:4523:4532:5342:5324:5432:5423:5243:5234:";
+            $string3 = "3456:3465:3546:3564:3654:3645:4356:4365:4536:4563:4653:4635:5436:5463:5346:5364:5634:5643:6453:6435:6543:6534:6354:6345:";
+            $string4 = "4567:4576:4657:4675:4765:4756:5467:5476:5647:5674:5764:5746:6547:6574:6457:6475:6745:6754:7564:7546:7654:7645:7465:7456:";
+            $string5 = "5678:5687:5768:5786:5876:5867:6578:6587:6758:6785:6875:6857:7658:7685:7568:7586:7856:7865:8675:8657:8765:8756:8576:8567:";
+            $string6 = "6789:6798:6879:6897:6987:6978:7689:7698:7869:7896:7986:7968:8769:8796:8679:8697:8967:8976:9786:9768:9876:9867:9687:9678:";
+            $string7 = "7890:7809:7980:7908:7098:7089:8790:8709:8970:8907:8097:8079:9870:9807:9780:9708:9078:9087:0897:0879:0987:0978:0798:0789:";
+            $string8 = "890J:89J0:809J:80J9:8J09:8J90:980J:98J0:908J:90J8:9J08:9J80:098J:09J8:089J:08J9:0J89:0J98:J908:J980:J098:J089:J809:J890:";
+            $string9 = "90JQ:90QJ:9J0Q:9JQ0:9QJ0:9Q0J:09JQ:09QJ:0J9Q:0JQ9:0QJ9:0Q9J:J09Q:J0Q9:J90Q:J9Q0:JQ90:JQ09:Q0J9:Q09J:QJ09:QJ90:Q9J0:Q90J:";
+            $string10 = "0JQK:0JKQ:0QJK:0QKJ:0KQJ:0KJQ:J0QK:J0KQ:JQ0K:JQK0:JKQ0:JK0Q:QJ0K:QJK0:Q0JK:Q0KJ:QK0J:QKJ0:KJQ0:KJ0Q:KQJ0:KQ0J:K0QJ:K0JQ";
+
+            $string_all_cobinations = $string1.$string2.$string3.$string4.$string5.$string6.$string7.$string8.$string9.$string10;
+
+            if(strpos($string_all_cobinations, $four_cards_number) !== false){
                 
-                console_log($four_cards_suit."  ");
-                console_log($four_cards_number);
+               // echo "Word Found!";
+                console_log("found it!!!");
+                $konk_for_sure = 'yes';
+
+            } else {
+                $konk_for_sure = 'no';
+                console_log("NOT found");
+            }
+            //    console_log($four_cards_suit."  ");
+            //    console_log($four_cards_number);
+            //    console_log($straigh_value);
 
             // return 1, normaml knock
             // return A, AC2C 2 aces and duce
@@ -826,7 +863,8 @@ function check_for_knock($player){
             }
 
             // KONK knocking with 4 cards straight 
-            if (($four_cards_suit=='SSSS' || $four_cards_suit=='CCCC' || $four_cards_suit=='HHHH' || $four_cards_suit=='DDDD') and ($four_cards_number=='1234' || $four_cards_number=='2345' || $four_cards_number=='3456' || $four_cards_number=='4567' || $four_cards_number=='5678' || $four_cards_number=='6789' || $four_cards_number=='7890' || $four_cards_number=='0789' || $four_cards_number=='890J' || $four_cards_number=='089J' || $four_cards_number=='90JQ' || $four_cards_number=='09JQ' || $four_cards_number=='0JQK' || $four_cards_number=='0JKQ')) {
+            //console_log("value to KOKK " . $straigh_value);
+            if (($four_cards_suit=='SSSS' || $four_cards_suit=='CCCC' || $four_cards_suit=='HHHH' || $four_cards_suit=='DDDD') and ($konk_for_sure=='yes')) { 
                 // Free result set
                 $result->free();
                 CloseCon($conn);
@@ -1627,15 +1665,27 @@ function pick_from_table ($card_to_pick, $player){
     $sql = "UPDATE players SET knocked='0'";         
     $conn->query($sql);   
       
-      
-      
-    $sql = "INSERT into hand (card_delt, player, card_picked) values ('$card_to_pick','$player','1')";
     
-    $conn->query($sql); 
+    // avoid double entry of the same card in the hand of the players
+    $sql = "SELECT card_delt FROM hand WHERE card_delt='$card_to_pick'"; 
+            if($result = $conn->query($sql)){
+                if($result->num_rows > 0){
+                    $flag_to_insert = 'no';
+                } else {$flag_to_insert = 'yes';}
+            }          
+
+
+
+       if ($flag_to_insert=='yes'){    
+
+                $sql = "INSERT into hand (card_delt, player, card_picked) values ('$card_to_pick','$player','1')";
                 
-    $sql = "DELETE from played WHERE card_played='$card_to_pick'";
-    
-    $conn->query($sql); 
+                $conn->query($sql); 
+                            
+                $sql = "DELETE from played WHERE card_played='$card_to_pick'";
+                
+                $conn->query($sql); 
+       }
                         
     CloseCon($conn);
     

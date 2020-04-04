@@ -107,7 +107,7 @@ if($result = $conn->query($sql)){
 
     if ($shuffle_cards_par == 'yes') {
         
-        $shuffle_rtn = shuffle_deck();
+        $shuffle_rtn = shuffle_deck('guest');
         $deal_cards_rtn = deal_cards();
         echo "<br>";
         echo "Shuffle and deal operation completed successfully!";

@@ -63,11 +63,15 @@ else {
                 //    console_log('get_picked_card_func_return:'.get_picked_card($_SESSION['player']));
                 
 				  //  if (!isset($_SESSION['knocking']) and did_opponent_knocked($player)=='0'){
+				 //  console_log(did_a_player_knocked());	
+				  // console_log($_SESSION['player']);
+				  // console_log(get_picked_card($_SESSION['player']));
+
+
 				   if (!did_a_player_knocked()=='1') { 
 				
                             if (get_picked_card($_SESSION['player']) <> $card_delt){ $imagepath = "images\Card.png";}
-                            
-            
+                                       
                        
 				     }  	
                 
@@ -91,8 +95,8 @@ else {
 			}
 
 	
-            echo "</tr>";
-			echo "</table>";
+         //   echo "</tr>";
+		//	echo "</table>";
 			// Free result set
 			$result->free();
 		} else{

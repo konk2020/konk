@@ -7,8 +7,9 @@ include 'konkdb_connection.php';
 
 //ini_set('display_errors', 1);
 
-//check if need to re-shuffle 
+
 function check_reshuffle() {
+    // -- returns 1 when all the cards on the deck has been drawn (52 if them)
     $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -29,6 +30,8 @@ function check_reshuffle() {
 
 //count the number of cards for a player 
 function count_cards($player) {
+    // -- checks the number of cards the player has in his hand
+    // returns the number of cards
     $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -49,6 +52,8 @@ function count_cards($player) {
 }        
 
 function did_game_start() {
+// -- returns the number of cards delt, if its 7 the game started
+
     $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -118,6 +123,9 @@ function player_lowest_points() {
 } 
 
 function checK_if_valid_match() {
+    // -- checks to see if the match (game) between host and guest counts for ranking
+    // -- player can only play for raking if the raking levels are within 2 levels
+    // -- returns 1=match play, 2=not a match play
     $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -349,12 +357,14 @@ function print_konk_log_table() {
 
 
 function just_played($player) {
-   $conn = OpenCon();
+   // -- checks to see if the player just played
+   // -- reurns 1=yes or 0=no
+    $conn = OpenCon();
     
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     } 
-    
+        
     $sql = "SELECT player from players where player='$player' and player_just_played = '1'";
     
     if($result = $conn->query($sql)){
@@ -365,13 +375,12 @@ function just_played($player) {
         }
         else {
             CloseCon($conn);
+           // console_log("return NOTHING". ' 0');
             return '0';
         }
         
         
-    }    
-    
-//CloseCon($conn);          
+    }           
 } 
 
 function did_opponent_knocked($player) {
@@ -400,7 +409,36 @@ function did_opponent_knocked($player) {
 //CloseCon($conn);          
 } 
 
+//--- get the player that just played
+function player_who_knocked() {
+// -- return the player who knocked
 
+    $conn = OpenCon();
+    
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    } 
+    
+    $sql = "SELECT player from players where knocked = '1'";
+    
+    if($result = $conn->query($sql)){
+    
+        if($result->num_rows > 0){ 
+			while($row = $result->fetch_array()){
+							$player_knocked = $row['player'];  
+		        CloseCon($conn);
+				return $player_knocked;
+			}	
+        }
+        else {
+            CloseCon($conn);
+            return 'uknown player';
+        } 
+        
+    }    
+    
+//CloseCon($conn);          
+} 
 
 //--- get the player that just played
 function just_played_player() {
@@ -433,6 +471,8 @@ function just_played_player() {
 
 // -- return who delt last
 function who_delt_last() {
+    // -- function returns the player who delt last by checking the dealer flag in players table
+    
     $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -493,7 +533,10 @@ function get_player_name($player) {
 } 
 
 function did_a_player_knocked() {
-   $conn = OpenCon();
+   // -- checks to see if any of the players knocked
+   // -- returns 1=yes 0=no
+   
+    $conn = OpenCon();
     
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -578,6 +621,7 @@ function get_picked_card($player) {
 
 
 function draw_a_card($player){
+ // -- function draws a new card from the deck and returns card
   $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -648,12 +692,15 @@ function re_shuffle_deck(){
 } 
     
 function set_just_played_flag($player){
-   $conn = OpenCon();
+   
+  //  return '1';
+
+    $conn = OpenCon();
     
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     } 
-    
+     // -- can remove as this was replaced by a trigger on table played
     
        /* update all players last hand to 0 */
                 $sql = "UPDATE players SET player_just_played = '0'";
@@ -767,7 +814,12 @@ function player_is_knocking($player,$konk_flag){
 
 
 function check_for_knock($player){
-  $conn = OpenCon();
+  // -- function returns 1, A, or K if the player has a hand that can knock
+  // return 1, normaml knock
+  // return A, AC2C 2 aces and duce
+  // return K, is KONK,  4 cards straight of same suit  
+  
+    $conn = OpenCon();
     
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -776,7 +828,9 @@ function check_for_knock($player){
     $sql = "SELECT player, card_delt FROM hand WHERE player='$player' order by card_delt"; 
 
     if($result = $conn->query($sql)){
+        
         if($result->num_rows > 0){
+           
             $x = 1; 
             while($row = $result->fetch_array()){
                 
@@ -795,7 +849,7 @@ function check_for_knock($player){
             }
         }
     }
-        
+   // console_log("cards in hand--> ".$card_number);
         
                // use to check the last card discarded to make sure is not part of a KONK hand
                 $sql = "SELECT card_played FROM played where player ='$player' ORDER BY time_card_played DESC LIMIT 1"; 
@@ -817,11 +871,22 @@ function check_for_knock($player){
                         }
                     }
                 }
-                            
+      
+              if (strlen($last_card_suit)==3) {
+                 // -- if user has three cards then add the 4th one to check for KONK below   
                 $four_cards_suit = $card_suit . substr($last_card_drawn,0,1);
                 $four_cards_number = $card_number . substr($last_card_drawn,-1); 
-                console_log("suit " . $four_cards_suit);
-                console_log("cards " . $four_cards_number);
+
+              } else {
+                // -- user has 4 in hand b/c he picked one or drew one, lets check for KONK as well
+                $four_cards_suit = $card_suit;
+                $four_cards_number =  $card_number; 
+
+              }
+    
+            //    console_log("cards after played added " . $four_cards_number);
+           //     console_log("cards suit " . $four_cards_suit);
+
 
             $string1 = "1234:1243:1324:1342:1432:1423:2134:2143:2314:2341:2431:2413:3214:3241:3124:3142:3412:3421:4231:4213:4321:4312:4132:4123";                
             $string2 = "12345:2354:2435:2453:2543:2534:3245:3254:3425:3452:3542:3524:4325:4352:4235:4253:4523:4532:5342:5324:5432:5423:5243:5234:";
@@ -836,15 +901,24 @@ function check_for_knock($player){
 
             $string_all_cobinations = $string1.$string2.$string3.$string4.$string5.$string6.$string7.$string8.$string9.$string10;
 
-            if(strpos($string_all_cobinations, $four_cards_number) !== false){
+            // per Tio Willie (add the four of a kind)  
+            $string_4kind_cobinations = ':1111:'.':2222:'.':3333:'.':4444:'.':5555:'.':6666:'.':7777:'.':8888:'.':9999:'.':0000:'.
+            ':JJJJ:'.':QQQQ:'.':JJJJ:'.':KKKK:';
+             
+            // -- check for 4 of a kind
+            if((strpos($string_4kind_cobinations, $four_cards_number) !== false) and strlen($four_cards_number)=='4'){
+                $konk_for4kind_sure = 'yes';
+            }
+
+            if((strpos($string_all_cobinations, $four_cards_number) !== false) and strlen ($four_cards_number)=='4') {
                 
                // echo "Word Found!";
-                console_log("found it!!!");
+                console_log("found it, KONK!!!");
                 $konk_for_sure = 'yes';
 
             } else {
                 $konk_for_sure = 'no';
-                console_log("NOT found");
+                console_log("NOT found, :( no KONK");
             }
             //    console_log($four_cards_suit."  ");
             //    console_log($four_cards_number);
@@ -864,7 +938,10 @@ function check_for_knock($player){
 
             // KONK knocking with 4 cards straight 
             //console_log("value to KOKK " . $straigh_value);
-            if (($four_cards_suit=='SSSS' || $four_cards_suit=='CCCC' || $four_cards_suit=='HHHH' || $four_cards_suit=='DDDD') and ($konk_for_sure=='yes')) { 
+            if ((($four_cards_suit=='SSSS' || $four_cards_suit=='CCCC' || $four_cards_suit=='HHHH' || $four_cards_suit=='DDDD') and ($konk_for_sure=='yes')) or ($konk_for4kind_sure == 'yes')) { 
+                console_log("i am here");
+                console_log($four_cards_suit);
+                console_log($konk_for4kind_sure);
                 // Free result set
                 $result->free();
                 CloseCon($conn);
@@ -892,14 +969,52 @@ function check_for_knock($player){
 //CloseCon($conn);  
 }
 
+function get_last_player_who_discarted_card(){
+   // - returns the last person who discarted a card in table played
+    
+      $conn = OpenCon();
+      
+      if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+      }                
+                 // use to check the last card discarded to make sure is not part of a KONK hand
+                  $sql = "SELECT player FROM played ORDER BY time_card_played DESC LIMIT 1"; 
+  
+                  if($result = $conn->query($sql)){
+                      if($result->num_rows > 0){
+                          
+                          while($row = $result->fetch_array()){
+                              
+                              $player_last_discarted = $row['player'];
+
+                          }
+                      }
+                  }
+
+        
+              $result->free();        
+            CloseCon($conn);
+            return $player_last_discarted;
+
+  }
+
+
+
+
+
 function check_if_player_won(){
-  $conn = OpenCon();
+ // -- checks if player won, by comparing the scores, if so, calls function to insert into the konk_log table
+ // -- it also calls the function to set the level of the player now that the score has been recorded
+ // -- returns the actual name of player that won
+ 
+    $conn = OpenCon();
      
     
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }     
   
+    // -- there is only two records in this table at all times (gest and host)
     $sql = "SELECT player_name, score FROM players"; 
     
     if($result = $conn->query($sql)){
@@ -940,9 +1055,7 @@ function check_if_player_won(){
                 $insert_par = insert_score_into_log($player1_name, $player2_name, $player1_score, $player2_score);
                 // -- set the level of the players that that they have been recorded in the konk_log
                 set_player_level();
-            }
-            
-            
+            }    
                          
         } 
         
@@ -1010,6 +1123,8 @@ function insert_score_into_log($player1_name, $player2_name, $player1_score, $pl
 
 
 function shuffle_deck($player_delt_last) {
+    // -- shuffles the deck and sets the dealer flag 
+    // -- return 1=succcess!
     $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -1050,6 +1165,9 @@ function shuffle_deck($player_delt_last) {
 }
 
 function deal_cards(){
+// -- deals cards, 3 for one player and 4 to the other
+// returns 1=success!
+
    $conn = OpenCon();
     
     if ($conn->connect_error) {
@@ -1617,6 +1735,7 @@ function print_players_stats(){
 
 
 function discard_card($card_to_discard, $player){
+    // -- discard card and returns 1=success!
     
  $conn = OpenCon();
     
@@ -1624,17 +1743,19 @@ function discard_card($card_to_discard, $player){
         die("Connection failed: " . $conn->connect_error);
     } 
     
-                   
-    $sql = "INSERT into played (card_played, player) values ('$card_to_discard','$player')";  
-    $conn->query($sql);
-      
-                
-    $sql = "DELETE from hand WHERE card_delt='$card_to_discard'";
-    $conn->query($sql); 
+    //make sure the card_to_discard variable contains a card before insert
+    if (!empty($card_to_discard)) {               
+        $sql = "INSERT into played (card_played, player) values ('$card_to_discard','$player')";  
+        $conn->query($sql);
+        
+                    
+        $sql = "DELETE from hand WHERE card_delt='$card_to_discard'";
+        $conn->query($sql); 
+        
+        $sql = "UPDATE hand set card_picked='0'";
+        $conn->query($sql); 
     
-      $sql = "UPDATE hand set card_picked='0'";
-    $conn->query($sql); 
-                
+    }
                 
     /* update all players last hand to 0 */
  //   $sql = "UPDATE players SET player_just_played = '0'";    
@@ -1652,6 +1773,9 @@ function discard_card($card_to_discard, $player){
 }
 
 function pick_from_table ($card_to_pick, $player){
+// -- function gets card from the table and puts it in the hands of the player
+// -- returns 1=success!
+
     
     session_start();
          
@@ -1690,7 +1814,7 @@ function pick_from_table ($card_to_pick, $player){
     CloseCon($conn);
     
     unset($_SESSION['knocking']);
-          
+    return 1;      
     
 }
 

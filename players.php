@@ -122,5 +122,5 @@ if($result = $conn->query($sql)){
 
 </body>
 
-<p><center>&copy; Konk The Game | version 1.0</p></center>
+<p><center>&copy; Konk The Game | version 2.0</p></center>
 </html>

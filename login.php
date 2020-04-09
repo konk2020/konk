@@ -16,7 +16,7 @@ if (isset($_POST['submit'])){
 
     if ($resultSet->num_rows !== 0 ){
         // Process Login
-        $row - $resultSet->fetch_assoc();
+        $row = $resultSet->fetch_assoc();
         $verified = $row['verified'];
         $email = $row ['email'];
         $date = $row['createdate'];

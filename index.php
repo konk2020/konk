@@ -179,7 +179,9 @@ if (isset($_SESSION ['player_for_index'])) {
 
 ?>
 
-		 <input type='submit' <?=$btn_guest?> name="submitbtn" class='submit' value='GUEST Player'></input>
+<!--		 <input type='submit' <?=$btn_guest?> name="submitbtn" class='submit' value='GUEST Player'></input> -->
+		 <input type='submit' name="submitbtn" class='submit' value='GUEST Player'></input>
+
      </form>
      </td>  
      </tr>

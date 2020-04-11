@@ -151,7 +151,10 @@ if (isset($_SESSION ['player_for_index'])) {
     } 
 
 ?>
-		 <input type='submit' <?=$btn_host?> name="submitbtn" class='submit' value='Host Player'></input>
+<!--     <input type='submit' <?=$btn_host?> name="submitbtn" class='submit' value='Host Player'></input> -->
+     <input type='submit' name="submitbtn" class='submit' value='Host Player'></input>
+
+     
 
      </form>
      </td> 

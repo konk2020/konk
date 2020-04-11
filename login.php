@@ -70,7 +70,24 @@ if (isset($_POST['submit'])){
 <tr>
     <td colspan="2" style = "text-align:center;"><input type="SUBMIT"  class="submit" name="submit" value="Login" required/></td>
 </tr>
+
+
+<?php
+if (isset($_GET["newpwd"])) {
+    if ($_GET["newpwd"]== "passwordupdated") {
+        echo '<p class="signupsuccess">Password has been reset!</p>';
+        
+    }
+
+}
+?>
+
+<a href="reset-password.php">Forgot your password?</a>
+
 <tr>
+
+
+
     <td colspan="2" style = "text-align:center; font:20px Aria;">&copy; Konk The Game | version 3.0</td>
 </tr>
 

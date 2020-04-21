@@ -1,6 +1,3 @@
-        
-
-
 <?php
 
 include 'konkdb_connection.php';
@@ -1828,7 +1825,4 @@ function console_log($output, $with_script_tags = true) {
     }
     echo $js_code;
 }
-
-
-
 ?>

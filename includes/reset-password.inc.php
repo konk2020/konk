@@ -8,11 +8,11 @@ $password = $_POST["pwd"];
 $passwordRepeat = $_POST["pwd-repeat"];
 
 if (empty ($password) || empty($passwordRepeat)){
-    header("Location: .. /create-new-password.php?newpwd=empty");
+    header("Location: ../create-new-password.php?newpwd=empty");
     exit();
 
 } else if ($password != $passwordRepeat) {
-    header("Location: .. /create-new-password.php?newpwd=pwdnotsame");
+    header("Location: ../create-new-password.php?newpwd=pwdnotsame");
     exit ();
 }
 
@@ -31,7 +31,7 @@ if ($conn->connect_error) {
     $result = $conn->query($sql);
 
     if($result->num_rows == 0){
-        echo "You need to re-submit your reset request.";
+        echo "You need to re-submit your reset request. <a href='../reset-password.php'>Click HERE</a>";
         exit();
     } else {
                 // Record exists and valid token, move on with pwd reset
@@ -42,7 +42,7 @@ if ($conn->connect_error) {
                 $tokenCheck = password_verify($tokenBin, $row["pwdResetToken"]);
 
                 if ($tokenCheck === false) {
-                    echo "You need to re-submit your reset request.";
+                    echo "You need to re-submit your reset request. <a href='../reset-password.php'>Click HERE</a>";
                     exit();
 
                 } elseif ($tokenCheck === true) {

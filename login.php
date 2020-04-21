@@ -26,7 +26,8 @@ if (isset($_POST['submit'])){
         if ($verified ==  1){
             // Continue processing
 
-            echo "Your account has been verified and you have been loged in";
+            //echo "Your account has been verified and you have been loged in";
+            header("Location: index.php");
 
         } else {
 
@@ -37,7 +38,7 @@ if (isset($_POST['submit'])){
 
     } else {
         // Invalid Credentials
-        $error = "The username or password you entered is incorrect";
+        $error = "The username or password you entered is incorrect!";
 
     }
 }
@@ -71,19 +72,29 @@ if (isset($_POST['submit'])){
     <td colspan="2" style = "text-align:center;"><input type="SUBMIT"  class="submit" name="submit" value="Login" required/></td>
 </tr>
 
+<tr>
+    <td colspan="2" style = "text-align:center;">
+    
+        <?php echo $error; ?>
+       
+  </td>
+</tr>
+
 
 <?php
 if (isset($_GET["newpwd"])) {
     if ($_GET["newpwd"]== "passwordupdated") {
-        echo '<p class="signupsuccess">Password has been reset!</p>';
+        echo '<p class="signupsuccess">Your password has been reset!</p>';
         
     }
 
 }
 ?>
-
-<a href="reset-password.php">Forgot your password?</a>
-
+<tr>
+<td colspan="2" style = "text-align:center;">
+<a href='reset-password.php'>Forgot your password?</a>
+</td>
+</tr>
 <tr>
 
 
@@ -96,13 +107,7 @@ if (isset($_GET["newpwd"])) {
 
 
 
-<center>
-<?php
 
-echo $error; 
-?>
-
-</center>
 
 </body>
 </html>

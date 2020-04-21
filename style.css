@@ -1,9 +1,9 @@
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;  
-    width: 50%;
+    width: 30%;
     margin: 0px auto;
-    margin-top: 13%;
+    margin-top: 0%;
 }
 
 td, th {
@@ -46,7 +46,6 @@ tr:nth-child(even) {
 
 .container {
     border-radius: 5px;
-    
     padding: 20px;
    
   }

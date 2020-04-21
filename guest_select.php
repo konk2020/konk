@@ -736,7 +736,12 @@ If ($player_par=='guest'){
 	$_SESSION['player'] = 'guest'; 
 }
 //-- this is used for the index page in case the user goes back to try to see the opponets card
-$_SESSION['player_for_index'] = $player_par;
+if ($player_par=='host') {
+    $_SESSION['h_player_for_index'] = get_player_name($player_par);
+} else {
+    $_SESSION['g_player_for_index'] = get_player_name('guest');
+}
+
 
 
 echo "<td>";

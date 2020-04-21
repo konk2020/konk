@@ -12,7 +12,7 @@ if (isset($_GET['vkey'])){
         $update = $mysqli->query("UPDATE ACCOUNTS SET verified = 1 WHERE vkey = '$vkey' LIMIT 1");
 
         if ($update){
-            echo "Your account has been verified. You may now login."; 
+            echo "Your account has been verified. <a href='index.php'>Click to Play!</a>"; 
 
         } else {
             echo $mysqli->error;
@@ -33,9 +33,7 @@ if (isset($_GET['vkey'])){
 </head>
 
 <body>
-<center>
 
-</center>
 </body>
 
 </html>

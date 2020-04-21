@@ -11,25 +11,43 @@
 <tr>
     <td colspan="2" style = "text-align:center;">Reset your password</td>   
 </tr>
-<tr>
-<td colspan="2" style = "text-align:center; font:20px Aria;">An e-mail will be send to you with instructions on how to reset your password.</td>     
-</tr>
+
 
 <tr>
-    <td colspan="2" style = "text-align:center;"> <img src="images/konk_logo.jpg"></td>
+    <td colspan="2" style = "text-align:center;"> <a href="login.php"><img src="images/konk_logo.jpg"></a></td>
 </tr>
 
 <!--<form method="POST" action="includes/reset-request.inc.php1">-->
 <form method="POST" action="includes/reset-request.inc.php">
 
 <tr>
-    <td colspan="2" style = "text-align:center;" ><input type="TEXT" name="email" placeholder="Enter your email-address..." required/></td>
+    <td colspan="2" style = "text-align:center;" ><input type="TEXT" name="email" placeholder="Enter your email..." required/></td>
 </tr>
-
 
 <tr>
-    <td colspan="2" style = "text-align:center;"><input type="SUBMIT"  class="submit" name="reset-request-submit" value="Receive new password by mail"/></td>
+<td colspan="2" style = "text-align:center; font:20px Aria;">
+<p>An e-mail will be sent to you with instructions on how to reset your password.<p>
+</td>     
 </tr>
+
+<tr>
+    <td colspan="2" style = "text-align:center;"><input type="SUBMIT"  class="submit" name="reset-request-submit" value="Get new password by e-mail"/></td>
+</tr>
+
+<tr>
+<td colspan="2" style = "text-align:center;">
+<?php
+if (isset($_GET["email"])) {
+    if ($_GET["email"]== "noemailfound") {
+        echo '<p class="pwdreset">You did not use this email to register for the game.</p>';
+        
+    }
+}
+?>
+</td>
+</tr>
+
+
 
 </form>
 <tr>

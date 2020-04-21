@@ -53,6 +53,7 @@ function sendMail($to, $subject, $message) {
         else 
         {
             //header('location:thankyou.php');
-            echo "Message has been sent successfully";
+            header("Location: registration.php?email='$to'");
+           // echo "Message has been sent successfully! We sent an email to ". $to;
         }
 }

@@ -18,9 +18,17 @@ $player_par = "";
 $keep_playing_btn_pressed = "no";
 
 // -- is the player parameter sent via a form submit, then set all  passing parameters to variables
-if (isset($_POST['player'])) {
+if (isset($_POST['player']) || isset($_GET['player'])) {
+    
+    if (isset($_GET['player'])){
+        // parameter send from the index page
+        $player_par = $_GET['player'];
+        $_SESSION['room'] = $_GET['room'];
+    } else {
+
+        $player_par = $_POST['player'];
+    }
 	
-	$player_par = $_POST['player'];
 	$draw_par = $_POST['draw'];
     $re_shuffle_par = $_POST['re_shuffle'];
     $shuffle_deck_par = $_POST['shuffle']; // yes/no
@@ -139,7 +147,7 @@ tr:nth-child(even) {
   <body>
       <table>
       <tr>
-      <td>Welcome to Konk The Game</td>  
+      <td>Welcome to Konk The Game | Room <?=$_SESSION['room']?></td>  
       <td><a href='.'>Go HOME</a></td> 
 	
 	 <td><span>Form will automatically submit in <b id='timer'>3</b> <b>seconds</b>.</span></td> 

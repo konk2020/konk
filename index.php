@@ -147,8 +147,11 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
                                   // kdatabases reset for dbID=room#
                                   $sql = "UPDATE kdatabases SET inuse = '0', playing = null, datescoreposted = '' WHERE databaseID = '$dbID'";    
                                   $conn->query($sql);          
-                                  // players reset 
-                                  $sql = "UPDATE players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  // players reset DB 1
+                                  $sql = "UPDATE konk.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  $conn->query($sql);   
+                                  // players reset DB 2
+                                  $sql = "UPDATE konk1.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
                                   $conn->query($sql);   
                              //echo "Room ".$dbID. " succesfully released!";
                               // reset all variables
@@ -164,7 +167,14 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
 
 
       }
+       
+      // if there is no rooms in used then make sure the accounts playerinroom are all set to 0
+    //   $sql = "UPDATE accounts SET playerinroom = '0'";  
+     //  $conn->query($sql);   
+
     }
+     
+
   }
 
   CloseCon($conn); 
@@ -199,21 +209,74 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
 ?>  
 </td>
 
-  <td><img src="images/open1.gif"></td><td><img src="images/open1.gif"></td><td><img src="images/open1.gif"></td><td><img src="images/open1.gif"></td>
+  <td><?php 
+// ROOM 2 close/open image
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT databaseID FROM kdatabases WHERE inuse = 1 and databaseID = 2 LIMIT 1");
+ if ($resultSet->num_rows == 1) {
+  $room_one_image = "images/closed1.gif";
+} else {
+  $room_one_image = "images/open1.gif";
+}
+  echo "<img src='$room_one_image'>";
+  CloseCon($conn); 
+?>  </td>
+<td><?php 
+// ROOM 3 close/open image
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT databaseID FROM kdatabases WHERE inuse = 1 and databaseID = 3 LIMIT 1");
+ if ($resultSet->num_rows == 1) {
+  $room_one_image = "images/closed1.gif";
+} else {
+  $room_one_image = "images/open1.gif";
+}
+  echo "<img src='$room_one_image'>";
+  CloseCon($conn); 
+?>  </td><td><?php 
+// ROOM 4 close/open image
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT databaseID FROM kdatabases WHERE inuse = 1 and databaseID = 4 LIMIT 1");
+ if ($resultSet->num_rows == 1) {
+  $room_one_image = "images/closed1.gif";
+} else {
+  $room_one_image = "images/open1.gif";
+}
+  echo "<img src='$room_one_image'>";
+  CloseCon($conn); 
+?>  </td><td><?php 
+// ROOM 1 close/open image
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT databaseID FROM kdatabases WHERE inuse = 1 and databaseID = 5 LIMIT 1");
+ if ($resultSet->num_rows == 1) {
+  $room_one_image = "images/closed1.gif";
+} else {
+  $room_one_image = "images/open1.gif";
+}
+  echo "<img src='$room_one_image'>";
+  CloseCon($conn); 
+?>  </td>
 <tr>
 <tr>
 <td>
 <?php 
 // ROOM 1 PLAYERS
  $conn = OpenCon();
- $resultSet = $conn->query("SELECT playing FROM kdatabases WHERE databaseID = 1 LIMIT 1");
+ $resultSet = $conn->query("SELECT playing, databaseID FROM kdatabases WHERE databaseID = 1 LIMIT 1");
  $row = $resultSet->fetch_array();
  if (empty($row['playing'])) {
   echo "No players...";
 
  } else {
-    echo $row['playing'];
-
+    // split the host from the guest
+    $len = strlen($row['playing']);
+    $pos = strpos($row['playing'],"vs.");
+    $pos_h_end = $pos-1;
+    $pos_g_start = ($pos + 4);
+    $host_str = substr($row['playing'], 0, $pos_h_end); 
+    $guest_str = substr($row['playing'], $pos_g_start, $len); 
+    $roomID = $row['databaseID'];
+    echo "<a href=".$secure_url."?player=host&room=$roomID style='font-size: 20px;'>".$host_str."</a>". " vs "."<a href=".$secure_url."?player=guest&room=$roomID style='font-size: 20px;'>".$guest_str."</a>";
+  
  }
   CloseCon($conn); 
 ?>  
@@ -221,7 +284,102 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
 
 
 </td>
-<td>Names....</td><td>Names....</td><td>Names....</td><td>Names....</td>
+<td>
+<?php 
+// ROOM 2 PLAYERS
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT playing, databaseID FROM kdatabases WHERE databaseID = 2 LIMIT 1");
+ $row = $resultSet->fetch_array();
+ if (empty($row['playing'])) {
+  echo "No players...";
+
+ } else {
+    // split the host from the guest
+    $len = strlen($row['playing']);
+    $pos = strpos($row['playing'],"vs.");
+    $pos_h_end = $pos-1;
+    $pos_g_start = ($pos + 4);
+    $host_str = substr($row['playing'], 0, $pos_h_end); 
+    $guest_str = substr($row['playing'], $pos_g_start, $len); 
+    $roomID = $row['databaseID'];
+    echo "<a href=".$secure_url."?player=host&room=$roomID style='font-size: 20px;'>".$host_str."</a>". " vs "."<a href=".$secure_url."?player=guest&room=$roomID style='font-size: 20px;'>".$guest_str."</a>";
+  
+ }
+  CloseCon($conn); 
+?>  
+</td>
+<td>
+<?php 
+// ROOM 3 PLAYERS
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT playing, databaseID FROM kdatabases WHERE databaseID = 3 LIMIT 1");
+ $row = $resultSet->fetch_array();
+ if (empty($row['playing'])) {
+  echo "No players...";
+
+ } else {
+    // split the host from the guest
+    $len = strlen($row['playing']);
+    $pos = strpos($row['playing'],"vs.");
+    $pos_h_end = $pos-1;
+    $pos_g_start = ($pos + 4);
+    $host_str = substr($row['playing'], 0, $pos_h_end); 
+    $guest_str = substr($row['playing'], $pos_g_start, $len); 
+    $roomID = $row['databaseID'];
+    echo "<a href=".$secure_url."?player=host&room=$roomID style='font-size: 20px;'>".$host_str."</a>". " vs "."<a href=".$secure_url."?player=guest&room=$roomID style='font-size: 20px;'>".$guest_str."</a>";
+  
+ }
+  CloseCon($conn); 
+?>    
+</td>
+<td>
+<?php 
+// ROOM 4 PLAYERS
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT playing, databaseID FROM kdatabases WHERE databaseID = 4 LIMIT 1");
+ $row = $resultSet->fetch_array();
+ if (empty($row['playing'])) {
+  echo "No players...";
+
+ } else {
+    // split the host from the guest
+    $len = strlen($row['playing']);
+    $pos = strpos($row['playing'],"vs.");
+    $pos_h_end = $pos-1;
+    $pos_g_start = ($pos + 4);
+    $host_str = substr($row['playing'], 0, $pos_h_end); 
+    $guest_str = substr($row['playing'], $pos_g_start, $len); 
+    $roomID = $row['databaseID'];
+    echo "<a href=".$secure_url."?player=host&room=$roomID style='font-size: 20px;'>".$host_str."</a>". " vs "."<a href=".$secure_url."?player=guest&room=$roomID style='font-size: 20px;'>".$guest_str."</a>";
+  
+ }
+  CloseCon($conn); 
+?>   
+</td>
+<td>
+<?php 
+// ROOM 5 PLAYERS
+ $conn = OpenCon();
+ $resultSet = $conn->query("SELECT playing, databaseID FROM kdatabases WHERE databaseID = 5 LIMIT 1");
+ $row = $resultSet->fetch_array();
+ if (empty($row['playing'])) {
+  echo "No players...";
+
+ } else {
+    // split the host from the guest
+    $len = strlen($row['playing']);
+    $pos = strpos($row['playing'],"vs.");
+    $pos_h_end = $pos-1;
+    $pos_g_start = ($pos + 4);
+    $host_str = substr($row['playing'], 0, $pos_h_end); 
+    $guest_str = substr($row['playing'], $pos_g_start, $len); 
+    $roomID = $row['databaseID'];
+    echo "<a href=".$secure_url."?player=host&room=$roomID style='font-size: 20px;'>".$host_str."</a>". " vs "."<a href=".$secure_url."?player=guest&room=$roomID style='font-size: 20px;'>".$guest_str."</a>";
+  
+ }
+  CloseCon($conn); 
+?>    
+</td>
 </tr>
 <tr>
 <td>Players will be removed after 15 minutes of inactivity</td><td>Players will be removed after 15 minutes of inactivity</td><td>Players will be removed after 15 minutes of inactivity</td><td>Players will be removed after 15 minutes of inactivity</td><td>Players will be removed after 15 minutes of inactivity</td>
@@ -331,7 +489,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
     // Show message if paramters were saved and ready to continue
 if (isset($_GET["reset"])) {
     if ($_GET["reset"]== "success") {
-        echo '<center><h2 style="color:red;">Game started Successfully! Select your name and start playing - Good Luck!</h2></center>';
+        echo '<h2 style="color:red;">Game started Successfully! Select your name below the room and start playing - Good Luck!</h2>';
         $_SESSION['room']= $_GET["room"];
         if (isset($_GET["gname"])) {
 
@@ -344,7 +502,12 @@ if (isset($_GET["reset"])) {
           $btn_host_name = $_GET["hname"];
           
         } else {$btn_host_name = 'No player'; }
+    } else {
+      echo '<h2 style="color:red;">ERROR! You must select all values above (host, guest and room).</h2>';
+
     }
+
+
 
 }
 ?>
@@ -373,17 +536,17 @@ if (isset($_SESSION ['h_player_for_index'])) {
 
 ?>
 <!--     <input type='submit' <?=$btn_host?> name="submitbtn" class='submit' value='Host Player'></input> -->
-     <input type='submit' name="submitbtn" class='submit' value='<?= $btn_host_name?>' ></input>
+ <!--     <input type='submit' name="submitbtn" class='submit' value='<?= $btn_host_name?>' ></input> -->
 
      
 
-     </form>
+  <!--    </form>
      </td> 
     
       <td>  
      <?php //  echo "Session player (". $_SESSION ['player_for_index'] . ") if not guest, btn disabled"; ?>
       <form method='post' action='<?=$secure_url?>'> 	 
-		 <input type='hidden' name='player' value='guest'> 
+		 <input type='hidden' name='player' value='guest'> -->
 <?php 
   
   if (isset($_SESSION ['g_player_for_index'])) {
@@ -401,14 +564,14 @@ if (isset($_SESSION ['h_player_for_index'])) {
 ?>
 
 <!--		 <input type='submit' <?=$btn_guest?> name="submitbtn" class='submit' value='GUEST Player'></input> -->
-		 <input type='submit' name="submitbtn" class='submit' value='<?= $btn_guest_name?>'></input>
+		<!-- <input type='submit' name="submitbtn" class='submit' value='<?= $btn_guest_name?>'></input>
 
      </form>
      </td>  
      </tr>
      </table>
 
-     </div>
+     </div> -->
 
 <?php 
 echo "<h1> Game Statistics for Game Room: ". $_SESSION['room']."</h1>";
@@ -419,7 +582,7 @@ echo "<h1> Game Statistics for Game Room: ". $_SESSION['room']."</h1>";
 
 </body>
 
-<p><center>&copy; Konk The Game | version 2.0</p></center>
+<p><center>&copy; Konk The Game | version 3.0</p></center>
 
 </html>
 

@@ -140,7 +140,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
     //       echo "<br>";
 
             // 15 minutes = 15*60 seconds = 900
-            if ($now > ($savedTimeTimestamp+60)) {
+            if ($now > ($savedTimeTimestamp+900)) {
                                   // accounts reset  for dbID=room#
                                   $sql = "UPDATE accounts SET playerinroom = '0' where playerinroom='$dbID'";  
                                   $conn->query($sql);               
@@ -244,7 +244,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
   echo "<img src='$room_one_image'>";
   CloseCon($conn); 
 ?>  </td><td><?php 
-// ROOM 1 close/open image
+// ROOM 5 close/open image
  $conn = OpenCon();
  $resultSet = $conn->query("SELECT databaseID FROM kdatabases WHERE inuse = 1 and databaseID = 5 LIMIT 1");
  if ($resultSet->num_rows == 1) {
@@ -402,7 +402,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
         die("Connection failed: " . $conn->connect_error);
     } 
     
-    $sql = "SELECT username FROM accounts where verified = '1' and playerinroom <> '1' order by username";
+    $sql = "SELECT username FROM accounts where verified = '1' and playerinroom = '0' order by username";
     echo "<select style='font-size: 30px;'  id='host_name' name='host_name'>";
     echo "<option  disabled selected value> -- select host player -- </option>";
     if($result = $conn->query($sql)){
@@ -429,7 +429,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
         die("Connection failed: " . $conn->connect_error);
     } 
     
-    $sql = "SELECT username FROM accounts where verified = '1' and playerinroom <> '1' order by username";
+    $sql = "SELECT username FROM accounts where verified = '1' and playerinroom = '0' order by username";
     echo "<select style='font-size: 30px;' id='guest_name' name='guest_name'>";
     echo "<option disabled selected value> -- select guest player -- </option>";
     if($result = $conn->query($sql)){

@@ -11,7 +11,7 @@ include_once 'query_functions.php';
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {font-family: Arial, Helvetica, sans-serif;}
-* {box-sizing: border-box;}
+<!-- html{display: inline;} -->
 
 input[type=text], select, textarea {
   width: 100%;
@@ -76,8 +76,6 @@ th {
 }
 
 
-
-
 tr:nth-child(even) {
     background-color: white;
 }   
@@ -85,14 +83,17 @@ tr:nth-child(even) {
 
 .container {
   border-radius: 5px;
-  background-color: #f2f2f2;
   padding: 20px;
+  width: 100%;
 }
 
 </style>
 </head>
 <body>
  <center><a href="index.php"><img src="images/konk_logo.jpg"></a></center>
+ <br>
+ <center>Beta version 3.0</center>
+ 
 
 
  
@@ -102,17 +103,24 @@ $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERV
 $url = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 //echo $url; // Outputs: Full URL
 
-$protocol_var = 'http:';
+if ($protocol=='https://') {
+    $protocol_var = 'https://';
+    }else {
+      $protocol_var = 'http://';  
+    }
+    
 $host_var = 'konk.us';
 
 if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false) {
 
   $secure_url = 'https://konk.us/guest_select.php';
   $secure_url1 = 'https://konk.us/players.php';
+  $db_prefix = "jvrtech_";
 
 } else {
     $secure_url = 'guest_select.php';
     $secure_url1 = 'players.php';
+    $db_prefix = "";
     
   }
  
@@ -127,20 +135,46 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
   if($resultSet->num_rows > 0){
       while($row = $resultSet->fetch_array()){
 
-            $now    = time();
+            $now    = date("U");
             $savedTime = $row['datescoreposted'];
+            console_log("RAW saved dt from db ". $savedTime);
             $savedTimeTimestam = strtotime($savedTime);
             $savedTimeTimestamp = date("U",$savedTimeTimestam);
-           // $target = strtotime($row['datescoreposted']);
             $dbID = $row['databaseID'];
-           // $diff   = $now - $target;
-    //    echo date('Y/m/d h:i:s', $now); 
-    //       echo "<br>";
-    //       echo date('Y/m/d h:i:s', $savedTimeTimestamp); 
-    //       echo "<br>";
+       
+        //   echo date('Y/m/d h:i:s', $now); 
+         //  echo date($now); 
+          console_log("current systime: ". $now); 
+           
+           echo "<br>";
+           //echo date('Y/m/d h:i:s', $savedTimeTimestamp); 
+          // echo date($savedTimeTimestamp); 
+            
+           
+          console_log("db prefix: ".$db_prefix);
+            
+           echo "<br>";
 
+           console_log("protocol: ".$protocol);
+           // for some readon the date is posted as a date string when players.php is run (starting the game), 
+           // after a game is won it changes a numeric value. The conversion ends up in 0 so have to check and revent to the 
+           // number date in order to do the comparison
+           if ($protocol=='http://') {
+                if ($savedTimeTimestam==0){
+                  $saved_date = $savedTime;
+                } else {
+                  $saved_date = $savedTimeTimestamp;
+                }
+
+           } else {
+            // prod server using date w/o convert
+            $saved_date = $savedTime;
+            
+           }
+
+           console_log("saved dt before if statement  ". $saved_date);
             // 15 minutes = 15*60 seconds = 900
-            if ($now > ($savedTimeTimestamp+900)) {
+            if ($now > ($saved_date+900)) {
                                   // accounts reset  for dbID=room#
                                   $sql = "UPDATE accounts SET playerinroom = '0' where playerinroom='$dbID'";  
                                   $conn->query($sql);               
@@ -148,11 +182,21 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
                                   $sql = "UPDATE kdatabases SET inuse = '0', playing = null, datescoreposted = '' WHERE databaseID = '$dbID'";    
                                   $conn->query($sql);          
                                   // players reset DB 1
-                                  $sql = "UPDATE konk.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  $sql = "UPDATE ".$db_prefix."konk.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
                                   $conn->query($sql);   
                                   // players reset DB 2
-                                  $sql = "UPDATE konk1.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  $sql = "UPDATE ".$db_prefix."konk1.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
                                   $conn->query($sql);   
+                                   // players reset DB 3
+                                   $sql = "UPDATE ".$db_prefix."konk2.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  $conn->query($sql); 
+                                   // players reset DB 4
+                                   $sql = "UPDATE ".$db_prefix."konk3.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  $conn->query($sql); 
+                                   // players reset DB 5
+                                   $sql = "UPDATE ".$db_prefix."konk4.players SET gameroom = '0', player_name='' WHERE gameroom = '$dbID'";  
+                                  $conn->query($sql); 
+                                    
                              //echo "Room ".$dbID. " succesfully released!";
                               // reset all variables
                               unset($_SESSION['room']);
@@ -388,7 +432,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
 
 
 
-<div class="container">
+<div class="container"> 
     <form method='post' name='form1' action='<?=$secure_url1?>' onsubmit=' return comparenames()'> 	
     <label style='font-size: 30px;' for="host_name">Who will be the host (the one that  starts the game)?</label>
     
@@ -421,6 +465,7 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
 
     <label style='font-size: 30px;' for="guest_name">Who will be the guest?</label>
     <!-- <input type="text" id="guest_name" name="guest_name" placeholder="Guest Player First Name.."> -->
+  </td>
 
     <?php
 // create drop down for Guest Players
@@ -482,9 +527,10 @@ if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false)
     <input type="submit" value="Start Game!">
   </form>
   <script src="custom-functions1.js"></script>
-</div>
-    
-    <div class="container">
+</div> 
+    <br>
+    <br>
+   <div class="container"> 
 <?php    
     // Show message if paramters were saved and ready to continue
 if (isset($_GET["reset"])) {
@@ -511,6 +557,7 @@ if (isset($_GET["reset"])) {
 
 }
 ?>
+
 
       <table>
 	  <tr>
@@ -569,12 +616,20 @@ if (isset($_SESSION ['h_player_for_index'])) {
      </form>
      </td>  
      </tr>
-     </table>
+     </table> -->
 
-     </div> -->
+     </div>
 
 <?php 
-echo "<h1> Game Statistics for Game Room: ". $_SESSION['room']."</h1>";
+
+if (isset($_SESSION['room'])){
+  echo "<h1> Game Statistics for Game Room: ". $_SESSION['room']."</h1>";
+} else {
+
+  echo "<h1> Game Statistics for Game Room: 1 (default room)";
+}
+
+
     print_player_level_table();
     print_players_stats();
     print_konk_log_table();

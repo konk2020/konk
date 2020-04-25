@@ -756,14 +756,40 @@ function player_is_knocking($player,$konk_flag){
 				$player_score = $player_score + $card_value;
 
 			}	
-				//--- code to get the exisiting score of the player so we can then add it
-                $sql1 = "select score from players where player='$player'";
+                //--- code to get the exisiting score of the player so we can then add it, also to get the names of both players
+                // remember that this table should only containg two records (host, and guest)
+                //$sql1 = "select score from players where player='$player'";
+                $sql1 = "select player, player_name, score from players";
+            
+                $hname_for_kdatabases = '';
+                $gname_for_kdatabases = '';
+                $hscore_for_kdatabase = 0;
+                $gscore_for_kdatabase = 0;
+
                 $result1 = $conn->query($sql1);
                  if($result1->num_rows > 0){
                     $player_saved_score = 0;
             
                     while($row = $result1->fetch_array()){
-                        $player_saved_score = $row['score'];     
+                        if ($row['player']== $player) {
+                            $player_saved_score = $row['score']; 
+                            if ($row['player'] == 'host') {
+                                $hname_for_kdatabases = $row['player_name'];
+                                $hscore_for_kdatabase = $row['score']; 
+                            } else { 
+                                $gname_for_kdatabases = $row['player_name']; 
+                                $gscore_for_kdatabase = $row['score'];
+
+                            }
+
+                        } elseif ($row['player'] == 'host') {
+                            $hname_for_kdatabases = $row['player_name']; 
+                            $hscore_for_kdatabase = $row['score'];
+
+                        } else {
+                            $gname_for_kdatabases = $row['player_name']; 
+                            $gscore_for_kdatabase = $row['score'];
+                        }  
             
                     }
                  }
@@ -794,8 +820,20 @@ function player_is_knocking($player,$konk_flag){
                 //--- reset the deck
                 $sql = "UPDATE deck SET draw='0'";            
                 $conn->query($sql); 
-            
-				
+
+                // update kdatabase view
+                // remember is reversed 
+                if ($player=='host') {
+                    $hscore_for_kdatabase = $player_score;
+                } else {
+                    // guest
+                    $gscore_for_kdatabase = $player_score;
+                }    
+
+                $now = date("U");
+                $room_db = $_SESSION['room'];
+                $sql = "UPDATE kdatabases SET inuse='1', playing = CONCAT('$hname_for_kdatabases', '(', '$hscore_for_kdatabase',')',' vs. ', '$gname_for_kdatabases', '(','$gscore_for_kdatabase',')'), datescoreposted = '$now' WHERE databaseID='$room_db'";            
+				$conn->query($sql); 
                 // Free result set
                 $result->free();
             
@@ -1111,6 +1149,13 @@ function insert_score_into_log($player1_name, $player2_name, $player1_score, $pl
     $sql = "UPDATE players set score='0'";    
     $conn->query($sql); 
     
+     // update kdatabase view
+     $now = date("U");
+     $room_number = $_SESSION['room'];
+     $sql = "UPDATE kdatabases SET inuse='1', playing = CONCAT('$player1_name', '(', '0',')',' vs. ', '$player2_name', '(','0',')'), datescoreposted = '$now' WHERE databaseID='$room_number'";
+     $conn->query($sql);
+
+
     CloseCon($conn);
     return '1';; 
 

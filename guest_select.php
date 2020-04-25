@@ -772,7 +772,7 @@ echo "</tr>";
 echo "</table>";          
           
 
-echo "<p><center>&copy; Konk The Game | version 2.0</p></center>";          
+echo "<p><center>&copy; Konk The Game | version 3.0</p></center>";          
 
 
 CloseCon($conn);

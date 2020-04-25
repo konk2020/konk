@@ -11,15 +11,20 @@ $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERV
 $url = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 //echo $url; // Outputs: Full URL
 
-$protocol_var = 'http:';
-$host_var = 'konk.us';
+if ($protocol=='https://') {
+    $protocol_var = 'https://';
+} else {
+    $protocol_var = 'http://';
+}
+$host_var = 'localhost';
 
 if (strpos($url, $protocol_var) !== false and strpos($url, $host_var) !== false) {
   // verify.php is used for the email being send to the user
-  $secure_url = 'https://konk.us/verify.php';
+  $secure_url = 'http://localhost:8888/konk/verify.php';
 
 } else {
-  $secure_url = 'http://localhost:8888/konk/verify.php';
+  
+  $secure_url = 'https://konk.us/verify.php';
     
   }
 
@@ -48,7 +53,12 @@ if (isset($_POST['submit'])){
         // Form is valid
 
         // Connect to the database
+        if ($protocol=='https://') {
+            // prod server use the proper DB
+            $mysqli = NEW MySQLi ('localhost','jvrtechl_konkadmin','mk74sps49', 'jvrtechl_konkusers');
+        } else {
         $mysqli = NEW MySQLi ('localhost','root','root', 'konkusers');
+        }
 
         // Sanitize from data
         $u = $mysqli->real_escape_string($u);

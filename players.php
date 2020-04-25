@@ -77,11 +77,15 @@ if (isset($_POST["host_name"]) and isset($_POST["guest_name"]) and isset($_POST[
               // --- room number for both guest and host and update the kdatabase view to be used the database assigned to room 
               $sql = "UPDATE players set gameroom='$room_number'";
               $conn->query($sql);
+
               // update kdatabase view
-              $sql = "UPDATE kdatabases set inuse='1' where databaseID='$room_number'";
+              $now = date("U");
+              $sql = "UPDATE kdatabases SET inuse='1', playing = CONCAT('$host_name', '(', '0',')',' vs. ', '$guest_name', '(','0',')'), datescoreposted = '$now' WHERE databaseID='$room_number'";
+
+              //$sql = "UPDATE kdatabases set inuse='1' where databaseID='$room_number'";
               $conn->query($sql);
 
-            /* echo "<br>";
+              /* echo "<br>";
               echo "&#10004 Game Room set to ". $room_number;
               echo "<br>";
               echo "&#10004 Database set to konk". $room_number; */

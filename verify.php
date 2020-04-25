@@ -9,10 +9,10 @@ if (isset($_GET['vkey'])){
 
     if ($resultSet->num_rows == 1) {
         // Validate The mail
-        $update = $mysqli->query("UPDATE ACCOUNTS SET verified = 1 WHERE vkey = '$vkey' LIMIT 1");
+        $update = $mysqli->query("UPDATE accounts SET verified = 1 WHERE vkey = '$vkey' LIMIT 1");
 
         if ($update){
-            echo "Your account has been verified. <a href='index.php'>Click to Play!</a>"; 
+            echo "<h1>Your account has been verified. <a href='index.php'>Click to Play!</a></h1>"; 
 
         } else {
             echo $mysqli->error;

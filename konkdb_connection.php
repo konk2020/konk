@@ -10,6 +10,12 @@ function OpenCon()
     $db = "konk";
  } elseif ($_SESSION['room']==2) {
     $db = "konk1";
+} elseif ($_SESSION['room']==3) {
+    $db = "konk2";
+} elseif ($_SESSION['room']==4) {
+    $db = "konk3";
+} elseif ($_SESSION['room']==5) {
+    $db = "konk4";    
 } else {
     // default room1=konk database
     $db = "konk";
